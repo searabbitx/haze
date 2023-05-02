@@ -1,28 +1,9 @@
 package http
 
 import (
-	"bytes"
-	"reflect"
+	"github.com/kamil-s-solecki/haze/testutils"
 	"testing"
 )
-
-func assertEquals[T comparable](t *testing.T, got T, want T) {
-	if got != want {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-}
-
-func assertMapEquals[T comparable](t *testing.T, got map[T]T, want map[T]T) {
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-}
-
-func assertByteEquals(t *testing.T, got []byte, want []byte) {
-	if !bytes.Equal(got, want) {
-		t.Errorf("got %v, wanted %v", got, want)
-	}
-}
 
 func TestMethod(t *testing.T) {
 	cases := []struct {
@@ -37,7 +18,7 @@ func TestMethod(t *testing.T) {
 		got := Parse(c.req).Method
 		want := c.method
 
-		assertEquals(t, got, want)
+		testutils.AssertEquals(t, got, want)
 	}
 }
 
@@ -54,7 +35,7 @@ func TestPath(t *testing.T) {
 		got := Parse(c.req).Path
 		want := c.path
 
-		assertEquals(t, got, want)
+		testutils.AssertEquals(t, got, want)
 	}
 }
 
@@ -71,7 +52,7 @@ func TestProtocolVersion(t *testing.T) {
 		got := Parse(c.req).ProtocolVersion
 		want := c.pv
 
-		assertEquals(t, got, want)
+		testutils.AssertEquals(t, got, want)
 	}
 }
 
@@ -91,7 +72,7 @@ func TestHeaders(t *testing.T) {
 		got := Parse(c.req).Headers
 		want := c.hs
 
-		assertMapEquals(t, got, want)
+		testutils.AssertMapEquals(t, got, want)
 	}
 }
 
@@ -101,5 +82,5 @@ func TestBody(t *testing.T) {
 	got := Parse(req).Body
 	want := []byte("foo=bar")
 
-	assertByteEquals(t, got, want)
+	testutils.AssertByteEquals(t, got, want)
 }
