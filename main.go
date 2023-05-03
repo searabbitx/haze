@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"github.com/kamil-s-solecki/haze/http"
 )
 
 func main() {
@@ -11,11 +12,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	rq := os.Args[1]
-	if _, err := os.Stat(rq); err != nil {
-		fmt.Println("Cannot read", rq);
+	rqPath := os.Args[1]
+	if _, err := os.Stat(rqPath); err != nil {
+		fmt.Println("Cannot read", rqPath)
 		os.Exit(1)
 	}
 
-	fmt.Println("Request file:", rq)
+	fmt.Println("Request file:", rqPath)
+	rawRq, _ := os.ReadFile(rqPath)
+	rq := http.Parse(rawRq)
+
+	fmt.Println(rq)
 }
