@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"net/http"
 	"strings"
 )
 
@@ -69,4 +70,18 @@ func extractBody(rawReq []byte) []byte {
 	twoRns := []byte("\r\n\r\n")
 	bodyIndex := bytes.Index(rawReq, twoRns) + len(twoRns)
 	return rawReq[bodyIndex:]
+}
+
+func (r Request) Send(host string) {
+	url := host + r.RequestUri
+	req, err := http.NewRequest(r.Method, url, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	client := &http.Client{}
+	_, err = client.Do(req)
+	if err != nil {
+		panic(err)
+	}
 }

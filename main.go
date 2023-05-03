@@ -23,4 +23,6 @@ func main() {
 	rq := http.Parse(rawRq)
 
 	fmt.Println(rq)
+
+	rq.Send("http://localhost:9090")
 }
