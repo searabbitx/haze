@@ -2,20 +2,24 @@ package mutation
 
 import "github.com/kamil-s-solecki/haze/http"
 
-type Mutation string
+type Mutation func(http.Request) http.Request
 
-const (
-	SingleQuotes Mutation = "SingleQuotes"
-)
+func SingleQuotes(rq http.Request) http.Request {
+	return rq.WithPath(rq.Path + "'")
+}
+
+func DoubleQuotes(rq http.Request) http.Request {
+	return rq.WithPath(rq.Path + "\"")
+}
 
 func AllMutations() []Mutation {
-	return []Mutation{SingleQuotes}
+	return []Mutation{SingleQuotes, DoubleQuotes}
 }
 
 func Mutate(rq http.Request, mutations []Mutation) []http.Request {
 	result := []http.Request{}
-	for i := 0; i < len(mutations); i++ {
-		result = append(result, rq.WithPath(rq.Path+"'"))
+	for _, mut := range mutations {
+		result = append(result, mut(rq))
 	}
 	return result
 }
