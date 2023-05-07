@@ -89,3 +89,9 @@ func (r Request) Send(host string) {
 		panic(err)
 	}
 }
+
+func (r Request) WithPath(path string) Request {
+	requestUri := strings.Replace(r.RequestUri, r.Path, path, 1)
+	return Request{RequestUri: requestUri, Method: r.Method, Path: path, Query: r.Query,
+		ProtocolVersion: r.ProtocolVersion, Headers: r.Headers, Body: r.Body}
+}
