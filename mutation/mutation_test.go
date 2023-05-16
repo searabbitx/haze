@@ -53,3 +53,23 @@ func TestApplyDoubleQuotesMutationToParameter(t *testing.T) {
 	testutils.AssertEquals(t, got[0].Query, "foo=bar\"")
 	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar\"")
 }
+
+func TestApplyDoubleQuotesMutationToBothParameters(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar&baz=quix HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 2)
+	testutils.AssertEquals(t, got[0].Query, "foo=bar\"&baz=quix")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar\"&baz=quix")
+	testutils.AssertEquals(t, got[1].Query, "foo=bar&baz=quix\"")
+	testutils.AssertEquals(t, got[1].RequestUri, "/somepath?foo=bar&baz=quix\"")
+}
+
+func TestDoNothingForEmptyQuery(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 0)
+}
