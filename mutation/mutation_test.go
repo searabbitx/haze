@@ -73,3 +73,39 @@ func TestDoNothingForEmptyQuery(t *testing.T) {
 
 	testutils.AssertLen(t, got, 0)
 }
+
+func TestDoNothingForEmptyBody(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
+
+	testutils.AssertLen(t, got, 0)
+}
+
+func TestApplyDoubleQuotesMutationToBodyParameter(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=bar\""))
+}
+
+func TestApplySingleQuotesMutationToBodyParameter(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{BodyParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=bar'"))
+}
+
+func TestApplySstiFuzzMutationToParameter(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{SstiFuzz}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=bar${{<%25[%25'%22}}%25%5c.")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar${{<%25[%25'%22}}%25%5c.")
+}

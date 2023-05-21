@@ -24,6 +24,20 @@ func Parameter(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
+func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
+	if len(rq.Body) == 0 {
+		return []http.Request{}
+	}
+
+	result := []http.Request{}
+	body := string(rq.Body)
+	for _, p := range strings.Split(body, "&") {
+		q := strings.Replace(body, p, trans(p), 1)
+		result = append(result, rq.WithBody([]byte(q)))
+	}
+	return result
+}
+
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter}
+	return []Mutable{Path, Parameter, BodyParameter}
 }
