@@ -12,6 +12,18 @@ func AssertEquals[T comparable](t *testing.T, got T, want T) {
 	}
 }
 
+func AssertFalse(t *testing.T, got bool) {
+	if got {
+		t.Errorf("got true, expected false")
+	}
+}
+
+func AssertTrue(t *testing.T, got bool) {
+	if !got {
+		t.Errorf("got false, expected true")
+	}
+}
+
 func AssertMapEquals[T comparable](t *testing.T, got map[T]T, want map[T]T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, wanted %v", got, want)

@@ -5,6 +5,7 @@ import (
 	"os"
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/mutation"
+	"github.com/kamil-s-solecki/haze/reportable"
 )
 
 func readRawRequest() []byte {
@@ -26,10 +27,14 @@ func readRawRequest() []byte {
 
 func main() {
 	rq := http.Parse(readRawRequest())
+	addr := "http://localhost:9090"
 
-	rq.Send("http://localhost:9090")
+	rq.Send(addr)
 
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
-		mut.Send("http://localhost:9090")
+		res := mut.Send(addr)
+		if reportable.IsReportable(res) {
+			fmt.Println("Found 500!")
+		}
 	}
 }
