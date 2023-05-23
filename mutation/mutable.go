@@ -38,6 +38,14 @@ func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
+func Header(rq http.Request, trans func(string) string) []http.Request {
+	result := []http.Request{}
+	for key, val := range rq.Headers {
+		result = append(result, rq.WithHeader(key, trans(val)))
+	}
+	return result
+}
+
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter, BodyParameter}
+	return []Mutable{Path, Parameter, BodyParameter, Header}
 }

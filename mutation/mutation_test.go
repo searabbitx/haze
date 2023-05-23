@@ -109,3 +109,12 @@ func TestApplySstiFuzzMutationToParameter(t *testing.T) {
 	testutils.AssertEquals(t, got[0].Query, "foo=bar${{<%25[%25'%22}}%25%5c.")
 	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar${{<%25[%25'%22}}%25%5c.")
 }
+
+func TestApplyDoubleQuotesMutationToHeader(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Header})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar\"")
+}
