@@ -7,8 +7,16 @@ import (
 
 type Mutable func(http.Request, func(string) string) []http.Request
 
+func urlEncodeSpecials(val string) string {
+	val = strings.Replace(val, "%", "%25", -1)
+	val = strings.Replace(val, "\\", "%5c", -1)
+	val = strings.Replace(val, "\"", "%22", -1)
+	return val
+}
+
 func Path(rq http.Request, trans func(string) string) []http.Request {
-	return []http.Request{rq.WithPath(trans(rq.Path))}
+	val := urlEncodeSpecials(trans(rq.Path))
+	return []http.Request{rq.WithPath(val)}
 }
 
 func Parameter(rq http.Request, trans func(string) string) []http.Request {
@@ -18,7 +26,8 @@ func Parameter(rq http.Request, trans func(string) string) []http.Request {
 
 	result := []http.Request{}
 	for _, p := range strings.Split(rq.Query, "&") {
-		q := strings.Replace(rq.Query, p, trans(p), 1)
+		val := urlEncodeSpecials(trans(p))
+		q := strings.Replace(rq.Query, p, val, 1)
 		result = append(result, rq.WithQuery(q))
 	}
 	return result
@@ -32,7 +41,8 @@ func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	body := string(rq.Body)
 	for _, p := range strings.Split(body, "&") {
-		q := strings.Replace(body, p, trans(p), 1)
+		val := urlEncodeSpecials(trans(p))
+		q := strings.Replace(body, p, val, 1)
 		result = append(result, rq.WithBody([]byte(q)))
 	}
 	return result
@@ -41,11 +51,25 @@ func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
 func Header(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	for key, val := range rq.Headers {
+		switch key {
+		case "Content-Type", "Accept-Encoding", "Content-Encoding",
+			"Connection", "Content-Length", "Host":
+			continue
+		}
 		result = append(result, rq.WithHeader(key, trans(val)))
 	}
 	return result
 }
 
+func Cookie(rq http.Request, trans func(string) string) []http.Request {
+	result := []http.Request{}
+	for key, val := range rq.Cookies {
+		enc := urlEncodeSpecials(trans(val))
+		result = append(result, rq.WithCookie(key, enc))
+	}
+	return result
+}
+
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter, BodyParameter, Header}
+	return []Mutable{Path, Parameter, BodyParameter, Header, Cookie}
 }

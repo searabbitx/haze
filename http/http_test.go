@@ -156,3 +156,24 @@ func TestCloneHeaders(t *testing.T) {
 
 	testutils.AssertEquals(t, orig.Headers["Bar"], "Baz")
 }
+
+func TestCookies(t *testing.T) {
+	cases := []struct {
+		req []byte
+		cks map[string]string
+	}{
+		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=bar\r\n\r\n"), map[string]string{"foo": "bar"}},
+		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=bar \r\n\r\n"), map[string]string{"foo": "bar"}},
+		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=bar; baz=quix\r\n\r\n"),
+			map[string]string{"foo": "bar", "baz": "quix"}},
+	}
+
+	for _, c := range cases {
+		r := Parse(c.req)
+		got := r.Cookies
+		want := c.cks
+
+		testutils.AssertMapEquals(t, got, want)
+		testutils.AssertMapHasNoKey(t, r.Headers, "Cookie")
+	}
+}
