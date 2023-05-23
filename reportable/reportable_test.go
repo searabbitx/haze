@@ -7,7 +7,7 @@ import (
 )
 
 func TestShouldNotReport200(t *testing.T) {
-	res := http.Response{200}
+	res := http.Response{200, []byte{}}
 
 	got := IsReportable(res)
 
@@ -15,7 +15,7 @@ func TestShouldNotReport200(t *testing.T) {
 }
 
 func TestShouldReport500(t *testing.T) {
-	res := http.Response{500}
+	res := http.Response{500, []byte{}}
 
 	got := IsReportable(res)
 
