@@ -219,6 +219,16 @@ func TestApplySingleQuotesMutationToANestedArrayJsonParameter(t *testing.T) {
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":["bar'"]}`))
 }
 
+func TestApplySingleQuotesMutationToAllValuesInANestedArrayJsonParameter(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":[\"bar\",\"baz\"]}"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+
+	testutils.AssertLen(t, got, 2)
+	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":["bar'","baz"]}`))
+	testutils.AssertByteEquals(t, got[1].Body, []byte(`{"foo":["bar","baz'"]}`))
+}
+
 /*
 func TestApplySingleQuotesMutationToANestedJsonInNestedArrayJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":[{\"bar\":\"baz\"}]}"))
