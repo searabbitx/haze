@@ -185,3 +185,8 @@ func (r Request) HasJsonBody() bool {
 	ct, ok := r.Headers["Content-Type"]
 	return ok && ct == "application/json"
 }
+
+func (r Request) HasFormUrlEncodedBody() bool {
+	ct, ok := r.Headers["Content-Type"]
+	return ok && ct == "application/x-www-form-urlencoded"
+}

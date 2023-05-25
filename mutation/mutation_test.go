@@ -82,6 +82,14 @@ func TestDoNothingForEmptyBody(t *testing.T) {
 	testutils.AssertLen(t, got, 0)
 }
 
+func TestDoNothingForNonFormUrlencodedBody(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n\"bar\""))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
+
+	testutils.AssertLen(t, got, 0)
+}
+
 func TestApplyDoubleQuotesMutationToBodyParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
 
@@ -153,6 +161,16 @@ func TestApplyNegativeMutationToParameter(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=-123")
 	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=-123")
+}
+
+func TestApplyNegativeMutationToPath(t *testing.T) {
+	rq := http.Parse([]byte("GET /123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Negative}, []Mutable{Path})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Path, "/-123")
+	testutils.AssertEquals(t, got[0].RequestUri, "/-123")
 }
 
 func TestApplyMinusOneMutationToParameter(t *testing.T) {
