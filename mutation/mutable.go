@@ -129,15 +129,21 @@ func mutateJsonArray(arr []interface{}, trans func(string) string) []JsonMutatio
 	for i, v := range arr {
 		i := i
 		v := v
-		mut := JsonMutation{
-			Apply: func() {
-				arr[i] = trans(v.(string))
-			},
-			Revert: func() {
-				arr[i] = v
-			},
+		switch v.(type) {
+		case map[string]interface{}:
+			muts := mutateJsonRecursive(v.(map[string]interface{}), trans, []JsonMutation{})
+			res = append(res, muts...)
+		default:
+			mut := JsonMutation{
+				Apply: func() {
+					arr[i] = trans(v.(string))
+				},
+				Revert: func() {
+					arr[i] = v
+				},
+			}
+			res = append(res, mut)
 		}
-		res = append(res, mut)
 	}
 	return res
 }
