@@ -1,6 +1,8 @@
 package mutation
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/kamil-s-solecki/haze/http"
 	"strings"
 )
@@ -76,6 +78,54 @@ func Cookie(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
+func JsonParameter(rq http.Request, trans func(string) string) []http.Request {
+	if !rq.HasJsonBody() {
+		return []http.Request{}
+	}
+
+	data := decodeJson(rq.Body)
+	result := []http.Request{}
+
+	for _, mutJson := range mutateJson(data, trans) {
+		result = append(result, rq.WithBody(mutJson))
+	}
+	return result
+}
+
+func mutateJson(data map[string]interface{}, trans func(string) string) [][]byte {
+	return mutateJsonRecursive(data, data, trans, [][]byte{})
+}
+
+func mutateJsonRecursive(full map[string]interface{}, curr map[string]interface{}, trans func(string) string, agg [][]byte) [][]byte {
+	for key, val := range curr {
+		switch val.(type) {
+		case map[string]interface{}:
+			subs := mutateJsonRecursive(full, val.(map[string]interface{}), trans, agg)
+			agg = append(agg, subs...)
+		default:
+			mut := trans(fmt.Sprintf("%v", val))
+			mutJson := mutateJsonKey(full, curr, key, mut)
+			agg = append(agg, mutJson)
+		}
+	}
+	return agg
+}
+
+func mutateJsonKey(full map[string]interface{}, curr map[string]interface{}, key, val string) (result []byte) {
+	orig := curr[key]
+	defer func() { curr[key] = orig }()
+
+	curr[key] = val
+	result, _ = json.Marshal(full)
+	return
+}
+
+func decodeJson(bs []byte) map[string]interface{} {
+	var data map[string]interface{}
+	json.Unmarshal(bs, &data)
+	return data
+}
+
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter, BodyParameter, Header, Cookie}
+	return []Mutable{Path, Parameter, BodyParameter, Header, Cookie, JsonParameter}
 }

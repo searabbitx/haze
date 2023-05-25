@@ -180,3 +180,8 @@ func copyMap(hs map[string]string) map[string]string {
 	}
 	return res
 }
+
+func (r Request) HasJsonBody() bool {
+	ct, ok := r.Headers["Content-Type"]
+	return ok && ct == "application/json"
+}
