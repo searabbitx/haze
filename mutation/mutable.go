@@ -136,7 +136,7 @@ func mutateJsonArray(arr []interface{}, trans func(string) string) []JsonMutatio
 		default:
 			mut := JsonMutation{
 				Apply: func() {
-					arr[i] = trans(v.(string))
+					arr[i] = trans(fmt.Sprintf("%v", v))
 				},
 				Revert: func() {
 					arr[i] = v
