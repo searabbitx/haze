@@ -6,8 +6,8 @@ import (
 	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/mutation"
-	"github.com/kamil-s-solecki/haze/reportable"
 	"github.com/kamil-s-solecki/haze/report"
+	"github.com/kamil-s-solecki/haze/reportable"
 )
 
 func readRawRequest(rqPath string) []byte {
@@ -25,11 +25,13 @@ func main() {
 	reportDir := report.MakeReportDir()
 	fmt.Println("Report dir:", reportDir)
 
+	matchers := []reportable.Matcher{reportable.MatchCodes("500-510")}
+
 	rq.Send(addr)
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
 		res := mut.Send(addr)
-		if reportable.IsReportable(res) {
-			fmt.Println("Found 500!")
+		if reportable.IsReportable(res, matchers) {
+			fmt.Println("Found!")
 			report.Report(mut.Raw(addr), res.Raw, reportDir)
 		}
 	}
