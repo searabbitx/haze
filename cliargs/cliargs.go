@@ -70,6 +70,14 @@ func validateRequest(request string) {
 	if request == "" {
 		err("The request file (-r, -request) is required")
 	}
+
+	fi, e := os.Stat(request)
+	if e != nil {
+		err("Cannot read: " + request)
+	}
+	if fi.IsDir() {
+		err(request + " is a directory. Please provide a file")
+	}
 }
 
 func err(msg string) {
