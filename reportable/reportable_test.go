@@ -1,6 +1,7 @@
 package reportable
 
 import (
+	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/testutils"
 	"testing"
@@ -48,4 +49,23 @@ func TestShouldReportLengths(t *testing.T) {
 
 		testutils.AssertTrue(t, got)
 	}
+}
+
+func TestShouldConstructFromArgsWithCodesOnly(t *testing.T) {
+	args := cliargs.Args{MatchCodes: "500,501-502"}
+
+	got := FromArgs(args)
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, got))
+}
+
+func TestShouldConstructFromArgsWithCodesAndLens(t *testing.T) {
+	args := cliargs.Args{MatchCodes: "500,501-502", MatchLengths: "100-200"}
+
+	got := FromArgs(args)
+
+	testutils.AssertLen(t, got, 2)
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, got))
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 200, Length: 150}, got))
 }

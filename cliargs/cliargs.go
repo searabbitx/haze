@@ -8,8 +8,10 @@ import (
 )
 
 type Args struct {
-	Host        string
-	RequestFile string
+	Host         string
+	RequestFile  string
+	MatchCodes   string
+	MatchLengths string
 }
 
 type Param struct {
@@ -20,6 +22,8 @@ func ParseArgs() Args {
 	args := Args{}
 	stringVar(&args.Host, Param{Long: "host", Short: "t", Help: "Target host (protocol://hostname:port)"})
 	stringVar(&args.RequestFile, Param{Long: "request", Short: "r", Help: "File containing the raw http request"})
+	stringVar(&args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
+	stringVar(&args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
 
 	configUsage()
 
@@ -53,6 +57,8 @@ func printBanner() {
 func validate(args Args) {
 	validateHost(args.Host)
 	validateRequest(args.RequestFile)
+	validateRange(args.MatchCodes)
+	validateRange(args.MatchLengths)
 }
 
 func validateHost(host string) {
@@ -77,6 +83,17 @@ func validateRequest(request string) {
 	}
 	if fi.IsDir() {
 		err(request + " is a directory. Please provide a file")
+	}
+}
+
+func validateRange(val string) {
+	if val == "" {
+		return
+	}
+
+	r, _ := regexp.Compile("^[0-9]+(-[0-9]+)?(,[0-9]+(-[0-9]+)?)*$")
+	if !r.MatchString(val) {
+		err(fmt.Sprintf("Invalid range: '%v'. Example correct value: '100,200-300,400'", val))
 	}
 }
 

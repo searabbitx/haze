@@ -1,6 +1,7 @@
 package reportable
 
 import (
+	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
 	"strconv"
 	"strings"
@@ -52,6 +53,15 @@ func parseRange(val string) Range {
 		ran.To = ran.From
 	}
 	return ran
+}
+
+func FromArgs(args cliargs.Args) []Matcher {
+	result := []Matcher{}
+	result = append(result, MatchCodes(args.MatchCodes))
+	if args.MatchLengths != "" {
+		result = append(result, MatchLengths(args.MatchLengths))
+	}
+	return result
 }
 
 func IsReportable(res http.Response, matchers []Matcher) bool {
