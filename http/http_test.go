@@ -177,3 +177,21 @@ func TestCookies(t *testing.T) {
 		testutils.AssertMapHasNoKey(t, r.Headers, "Cookie")
 	}
 }
+
+func TestResponseStringer(t *testing.T) {
+	cases := []struct {
+		res Response
+		str string
+	}{
+		{Response{Code: 200, Length: 1234}, "[Code: 200, Len: 1234]"},
+		{Response{Code: 400, Length: 4321}, "[Code: 400, Len: 4321]"},
+	}
+
+	for _, c := range cases {
+		res := c.res
+
+		got := res.String()
+
+		testutils.AssertEquals(t, got, c.str)
+	}
+}
