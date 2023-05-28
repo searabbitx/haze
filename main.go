@@ -25,12 +25,12 @@ func main() {
 	reportDir := report.MakeReportDir()
 	fmt.Println("Report dir:", reportDir)
 
-	matchers := reportable.FromArgs(args)
+	matchers, filters := reportable.FromArgs(args)
 
 	rq.Send(addr)
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
 		res := mut.Send(addr)
-		if reportable.IsReportable(res, matchers) {
+		if reportable.IsReportable(res, matchers, filters) {
 			fmt.Println("Found!")
 			report.Report(mut.Raw(addr), res.Raw, reportDir)
 		}

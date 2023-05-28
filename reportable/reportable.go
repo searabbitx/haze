@@ -71,13 +71,21 @@ func parseRange(val string) Range {
 	return ran
 }
 
-func FromArgs(args cliargs.Args) []Matcher {
-	result := []Matcher{}
-	result = append(result, MatchCodes(args.MatchCodes))
+func FromArgs(args cliargs.Args) ([]Matcher, []Filter) {
+	matchers := []Matcher{}
+	matchers = append(matchers, MatchCodes(args.MatchCodes))
 	if args.MatchLengths != "" {
-		result = append(result, MatchLengths(args.MatchLengths))
+		matchers = append(matchers, MatchLengths(args.MatchLengths))
 	}
-	return result
+
+	filters := []Filter{}
+	if args.FilterCodes != "" {
+		filters = append(filters, FilterCodes(args.FilterCodes))
+	}
+	if args.FilterLengths != "" {
+		filters = append(filters, FilterLengths(args.FilterLengths))
+	}
+	return matchers, filters
 }
 
 func IsReportable(res http.Response, matchers []Matcher, filters []Filter) bool {
