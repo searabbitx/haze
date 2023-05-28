@@ -8,10 +8,11 @@ import (
 
 var curr int64 = 0
 
-func Report(rq []byte, res []byte, dir string) {
+func Report(rq []byte, res []byte, dir string) string {
 	curr += 1
-	fname := dir + "/" + strconv.FormatInt(curr, 10) + ".md"
-	file, err := os.Create(fname)
+	fname := strconv.FormatInt(curr, 10) + ".md"
+	fullFname := dir + "/" + fname
+	file, err := os.Create(fullFname)
 	if err != nil {
 		panic(err)
 	}
@@ -26,6 +27,8 @@ func Report(rq []byte, res []byte, dir string) {
 	file.Write([]byte("```\r\n"))
 	file.Write(res)
 	file.Write([]byte("\r\n```\r\n"))
+
+	return fname
 }
 
 func MakeReportDir() string {

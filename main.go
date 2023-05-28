@@ -31,8 +31,8 @@ func main() {
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
 		res := mut.Send(addr)
 		if reportable.IsReportable(res, matchers, filters) {
-			fmt.Println("Found!")
-			report.Report(mut.Raw(addr), res.Raw, reportDir)
+			fname := report.Report(mut.Raw(addr), res.Raw, reportDir)
+			fmt.Printf("Crash! %s (%s)\n", res, fname)
 		}
 	}
 }
