@@ -11,9 +11,16 @@ import (
 )
 
 func readRawRequest(rqPath string) []byte {
-	fmt.Println("Request file:", rqPath)
 	rawRq, _ := os.ReadFile(rqPath)
 	return rawRq
+}
+
+func printInfo(args cliargs.Args, reportDir string) {
+	cliargs.PrintBanner()
+	fmt.Println("-------------------------------------")
+	fmt.Println("  Request file: ", args.RequestFile)
+	fmt.Println("  Report  dir:  ", reportDir)
+	fmt.Println("-------------------------------------\n")
 }
 
 func main() {
@@ -23,9 +30,10 @@ func main() {
 	addr := args.Host
 
 	reportDir := report.MakeReportDir()
-	fmt.Println("Report dir:", reportDir)
 
 	matchers, filters := reportable.FromArgs(args)
+
+	printInfo(args, reportDir)
 
 	rq.Send(addr)
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
