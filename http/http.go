@@ -82,10 +82,10 @@ func parseHeader(rawHeader []byte) (name, val string) {
 	return
 }
 
-func extractBody(rawReq []byte) []byte {
+func extractBody(raw []byte) []byte {
 	twoRns := []byte("\r\n\r\n")
-	bodyIndex := bytes.Index(rawReq, twoRns) + len(twoRns)
-	return rawReq[bodyIndex:]
+	bodyIndex := bytes.Index(raw, twoRns) + len(twoRns)
+	return raw[bodyIndex:]
 }
 
 func parseRawCookies(cookies map[string]string, raw string) {
@@ -130,7 +130,13 @@ func (r Request) Send(host string) Response {
 		panic(err)
 	}
 	raw, err := httputil.DumpResponse(res, true)
-	return Response{res.StatusCode, res.ContentLength, raw}
+
+	contentLen := res.ContentLength
+	if contentLen == -1 {
+		contentLen = int64(len(extractBody(raw)))
+	}
+
+	return Response{res.StatusCode, contentLen, raw}
 }
 
 func (r Request) Raw(host string) []byte {
