@@ -15,17 +15,6 @@ func readRawRequest(rqPath string) []byte {
 	return rawRq
 }
 
-func printInfo(args cliargs.Args, reportDir string) {
-	cliargs.PrintBanner()
-	fmt.Println("-------------------------------------")
-	fmt.Println("  Target        : ", args.Host)
-	fmt.Println("  Request file  : ", args.RequestFile)
-	if reportDir != "" {
-		fmt.Println("  Report  dir   : ", reportDir)
-	}
-	fmt.Println("-------------------------------------\n")
-}
-
 func probe(rq http.Request, addr string) {
 	probe := rq.Send(addr)
 	fmt.Println("Probe:", probe)
@@ -37,13 +26,13 @@ func main() {
 	rq := http.Parse(readRawRequest(args.RequestFile))
 	addr := args.Host
 	if args.ProbeOnly {
-		printInfo(args, "")
+		cliargs.PrintInfo(args, "")
 		probe(rq, addr)
 		os.Exit(0)
 	}
 
 	reportDir := report.MakeReportDir()
-	printInfo(args, reportDir)
+	cliargs.PrintInfo(args, reportDir)
 	probe(rq, addr)
 	fmt.Println("")
 

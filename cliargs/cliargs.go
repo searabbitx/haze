@@ -75,12 +75,6 @@ func configUsage() {
 	}
 }
 
-func PrintBanner() {
-	fmt.Println("               .**.        ")
-	fmt.Println("            .. haze ..     ")
-	fmt.Println("               `**`        ")
-}
-
 func validate(args Args) {
 	validateHost(args.Host)
 	validateRequest(args.RequestFile)
