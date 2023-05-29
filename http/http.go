@@ -121,13 +121,13 @@ func (r Request) asHttpReq(host string) *http.Request {
 	return req
 }
 
-func (r Request) Send(host string) Response {
+func (r Request) Send(host string) (Response, error) {
 	req := r.asHttpReq(host)
 
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return Response{}, err
 	}
 	raw, err := httputil.DumpResponse(res, true)
 
@@ -136,7 +136,7 @@ func (r Request) Send(host string) Response {
 		contentLen = int64(len(extractBody(raw)))
 	}
 
-	return Response{res.StatusCode, contentLen, raw}
+	return Response{res.StatusCode, contentLen, raw}, nil
 }
 
 func (r Request) Raw(host string) []byte {

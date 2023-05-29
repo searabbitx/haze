@@ -21,4 +21,5 @@ make format
 - [ ] specify the output dir
 - [x] make some sane logging and general output look
 - [ ] make a custom help message to group flags 
-- [ ] error handling for conection refused etc
+- [x] error handling for conection refused etc
+- [ ] parallel requests!
