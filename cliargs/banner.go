@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	keyLen = 16
+)
+
 func PrintBanner() {
 	fmt.Println("               .**.        ")
 	fmt.Println("            .. haze ..     ")
@@ -35,10 +39,6 @@ func PrintInfo(args Args, reportDir string) {
 }
 
 type entry struct{ key, val string }
-
-const (
-	keyLen = 16
-)
 
 func printTable(es []entry) {
 	max := 0
