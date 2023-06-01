@@ -22,4 +22,5 @@ make format
 - [x] make some sane logging and general output look
 - [x] make a custom help message to group flags 
 - [x] error handling for conection refused etc
+- [ ] parse HARs
 - [ ] parallel requests!
