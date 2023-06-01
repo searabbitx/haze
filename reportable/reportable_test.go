@@ -123,3 +123,35 @@ func TestShouldConstructFromArgsWithFilters(t *testing.T) {
 	testutils.AssertFalse(t, IsReportable(http.Response{Code: 510}, ms, fs))
 	testutils.AssertFalse(t, IsReportable(http.Response{Code: 500, Length: 150}, ms, fs))
 }
+
+func TestShouldReportWhenStringMatches(t *testing.T) {
+	res := http.Response{Raw: []byte("foo bar baz")}
+
+	got := IsReportable(res, []Matcher{MatchString("bar")}, []Filter{})
+
+	testutils.AssertTrue(t, got)
+}
+
+func TestShouldNotReportWhenStringDoesNotMatche(t *testing.T) {
+	res := http.Response{Raw: []byte("foo bad baz")}
+
+	got := IsReportable(res, []Matcher{MatchString("bar")}, []Filter{})
+
+	testutils.AssertFalse(t, got)
+}
+
+func TestShouldNotReportWhenStringFilters(t *testing.T) {
+	res := http.Response{Code: 500, Raw: []byte("foo bar baz")}
+
+	got := IsReportable(res, []Matcher{MatchCodes("500")}, []Filter{FilterString("bar")})
+
+	testutils.AssertTrue(t, got)
+}
+
+func TestShouldReportWhenStringDoesNotFilter(t *testing.T) {
+	res := http.Response{Code: 500, Raw: []byte("foo ban baz")}
+
+	got := IsReportable(res, []Matcher{MatchCodes("500")}, []Filter{FilterString("bar")})
+
+	testutils.AssertFalse(t, got)
+}
