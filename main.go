@@ -32,8 +32,8 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 	matchers, filters := reportable.FromArgs(args)
 	muts := mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables())
 	bar := progress.Start(len(muts))
+	pool := workerpool.NewPool(args.Threads)
 
-	pool := workerpool.NewPool(10)
 	for  _, mut := range muts {
 		mut := mut
 		task := func() {

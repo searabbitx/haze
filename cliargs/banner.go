@@ -2,6 +2,7 @@ package cliargs
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -17,15 +18,6 @@ func PrintBanner() {
 
 func PrintInfo(args Args, reportDir string) {
 	PrintBanner()
-	/*
-		fmt.Println("-------------------------------------")
-		fmt.Println("  Target        : ", args.Host)
-		fmt.Println("  Request file  : ", args.RequestFile)
-		if reportDir != "" {
-			fmt.Println("  Report  dir   : ", reportDir)
-		}
-		fmt.Println("-------------------------------------\n")
-	*/
 	entries := []entry{
 		{"Target", args.Host},
 		{"Request file", args.RequestFile},
@@ -33,6 +25,9 @@ func PrintInfo(args Args, reportDir string) {
 
 	if reportDir != "" {
 		entries = append(entries, entry{"Report dir", reportDir})
+	}
+	if !args.ProbeOnly {
+		entries = append(entries, entry{"Threads", strconv.Itoa(args.Threads)})
 	}
 
 	printTable(entries)
