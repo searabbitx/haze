@@ -86,12 +86,14 @@ func parseRange(val string) Range {
 
 func FromArgs(args cliargs.Args) ([]Matcher, []Filter) {
 	matchers := []Matcher{}
-	matchers = append(matchers, MatchCodes(args.MatchCodes))
 	if args.MatchLengths != "" {
 		matchers = append(matchers, MatchLengths(args.MatchLengths))
 	}
 	if args.MatchString != "" {
 		matchers = append(matchers, MatchString(args.MatchString))
+	}
+	if !(len(matchers) > 0 && args.MatchCodes == "500-599") {
+		matchers = append(matchers, MatchCodes(args.MatchCodes))
 	}
 
 	filters := []Filter{}
