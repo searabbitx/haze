@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sync"
 )
 
 type Bar struct {
 	curr, total int
 	buff        *bufio.Writer
+	mu          sync.Mutex
 }
 
 func Start(total int) Bar {
@@ -17,13 +19,17 @@ func Start(total int) Bar {
 }
 
 func (b *Bar) Next() {
+	defer b.mu.Unlock()
+	b.mu.Lock()
 	b.curr++
 	b.update()
 }
 
 func (b Bar) Log(msg string) {
-	defer b.buff.Flush()
+	defer b.mu.Unlock()
+	b.mu.Lock()
 	fmt.Fprint(b.buff, msg, "\n")
+	b.buff.Flush()
 }
 
 func (b Bar) update() {
