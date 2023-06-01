@@ -55,7 +55,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	reportDir := report.MakeReportDir()
+	reportDir := report.MakeReportDir(args.OutputDir)
 	cliargs.PrintInfo(args, reportDir)
 	probe(rq, args.Host)
 	fmt.Println("\n  ...   Fuzzing    ...")

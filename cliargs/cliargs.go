@@ -10,6 +10,7 @@ import (
 type Args struct {
 	Host          string
 	RequestFile   string
+	OutputDir     string
 	MatchCodes    string
 	MatchLengths  string
 	MatchString   string
@@ -29,6 +30,7 @@ func ParseArgs() Args {
 	stringVar("GENERAL", &args.Host, Param{Long: "host", Short: "t", Help: "Target host (protocol://hostname:port)"})
 	stringVar("GENERAL", &args.RequestFile, Param{Long: "request", Short: "r", Help: "File containing the raw http request"})
 	boolVar("GENERAL", &args.ProbeOnly, Param{Long: "probe", Short: "p", Help: "Send the probe request only"})
+	stringVar("GENERAL", &args.OutputDir, Param{Long: "output", Short: "o", Help: "Directory where the report will be created. (Default: cwd)"})
 
 	stringVar("MATCHERS", &args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar("MATCHERS", &args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
@@ -77,6 +79,7 @@ func validate(args Args) {
 	validateRequest(args.RequestFile)
 	validateRange(args.MatchCodes)
 	validateRange(args.MatchLengths)
+	validateOutput(args.OutputDir)
 }
 
 func validateHost(host string) {
@@ -112,6 +115,20 @@ func validateRange(val string) {
 	r, _ := regexp.Compile("^[0-9]+(-[0-9]+)?(,[0-9]+(-[0-9]+)?)*$")
 	if !r.MatchString(val) {
 		err(fmt.Sprintf("Invalid range: '%v'. Example correct value: '100,200-300,400'", val))
+	}
+}
+
+func validateOutput(output string) {
+	if output == "" {
+		return
+	}
+
+	fi, e := os.Stat(output)
+	if e != nil {
+		err("Cannot open: " + output)
+	}
+	if !fi.IsDir() {
+		err(output + " is not a directory. Please provide a directory")
 	}
 }
 
