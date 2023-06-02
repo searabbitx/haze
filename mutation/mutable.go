@@ -23,17 +23,28 @@ func Path(rq http.Request, trans func(string) string) []http.Request {
 }
 
 func Parameter(rq http.Request, trans func(string) string) []http.Request {
-	if rq.Query == "" {
-		return []http.Request{}
-	}
-
 	result := []http.Request{}
-	for _, p := range strings.Split(rq.Query, "&") {
-		key := strings.Split(p, "=")[0]
-		val := strings.Split(p, "=")[1]
-		keyNVal := key + "=" + urlEncodeSpecials(trans(val))
+	if rq.Query == "" {
+		return result
+	}
+	do := func(key, val string) (string, string) {
+		return key, urlEncodeSpecials(trans(val))
+	}
+	for _, q := range applyToEachParam(rq.Query, do) {
+		result = append(result, rq.WithQuery(q))
+	}
+	return result
+}
 
-		q := strings.Replace(rq.Query, p, keyNVal, 1)
+func ParameterName(rq http.Request, trans func(string) string) []http.Request {
+	result := []http.Request{}
+	if rq.Query == "" {
+		return result
+	}
+	do := func(key, val string) (string, string) {
+		return trans(key), val
+	}
+	for _, q := range applyToEachParam(rq.Query, do) {
 		result = append(result, rq.WithQuery(q))
 	}
 	return result
@@ -53,6 +64,18 @@ func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
 
 		q := strings.Replace(body, p, keyNVal, 1)
 		result = append(result, rq.WithBody([]byte(q)))
+	}
+	return result
+}
+
+func applyToEachParam(params string, do func(key, val string) (string, string)) []string {
+	result := []string{}
+	for _, p := range strings.Split(params, "&") {
+		key := strings.Split(p, "=")[0]
+		val := strings.Split(p, "=")[1]
+		mutKey, mutVal := do(key, val)
+		q := strings.Replace(params, p, mutKey+"="+mutVal, 1)
+		result = append(result, q)
 	}
 	return result
 }
@@ -192,5 +215,5 @@ func decodeJson(bs []byte) interface{} {
 }
 
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter, BodyParameter, Header, Cookie, JsonParameter}
+	return []Mutable{Path, Parameter, ParameterName, BodyParameter, Header, Cookie, JsonParameter}
 }

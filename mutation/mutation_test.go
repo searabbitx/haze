@@ -36,7 +36,6 @@ func TestApplyDoubleQuotesMutationToPath(t *testing.T) {
 
 func TestApplySingleQuotesMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
-
 	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{Parameter})
 
 	testutils.AssertLen(t, got, 1)
@@ -308,4 +307,14 @@ func TestApplyCommaMutationToHeader(t *testing.T) {
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar,")
+}
+
+func TestApplyArraizeToQueryParameter(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Arraize}, []Mutable{ParameterName})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo[]=bar")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo[]=bar")
 }

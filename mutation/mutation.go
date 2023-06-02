@@ -40,6 +40,10 @@ func Comma(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ",")
 }
 
+func Arraize(rq http.Request, mutable Mutable) []http.Request {
+	return suffixMutation(rq, mutable, "[]")
+}
+
 func suffixMutation(rq http.Request, mutable Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
