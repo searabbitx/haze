@@ -1,0 +1,11 @@
+POST /test.php HTTP/1.1
+Host: foo.local
+Content-Length: 144
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryQdBweljBPtRAAu9f
+Connection: close
+
+------WebKitFormBoundaryQdBweljBPtRAAu9f
+Content-Disposition: form-data; name="text1"
+
+Some value
+------WebKitFormBoundaryQdBweljBPtRAAu9f--
