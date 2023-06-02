@@ -318,3 +318,11 @@ func TestApplyArraizeToQueryParameter(t *testing.T) {
 	testutils.AssertEquals(t, got[0].Query, "foo[]=bar")
 	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo[]=bar")
 }
+
+func TestShouldNotArraizeQueryParamVal(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Arraize}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 0)
+}
