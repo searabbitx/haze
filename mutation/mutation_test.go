@@ -326,3 +326,12 @@ func TestShouldNotArraizeQueryParamVal(t *testing.T) {
 
 	testutils.AssertLen(t, got, 0)
 }
+
+func TestApplyArraizeToBodyParameterName(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
+
+	got := Mutate(rq, []Mutation{Arraize}, []Mutable{BodyParameterName})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte("foo[]=bar"))
+}
