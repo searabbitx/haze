@@ -1,4 +1,4 @@
-package mutation
+package mutable
 
 import (
 	"bytes"
@@ -10,8 +10,8 @@ import (
 )
 
 type Mutable struct {
-	name  string
-	apply func(http.Request, func(string) string) []http.Request
+	Name  string
+	Apply func(http.Request, func(string) string) []http.Request
 }
 
 func urlEncodeSpecials(val string) string {

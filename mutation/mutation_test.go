@@ -2,6 +2,7 @@ package mutation
 
 import (
 	"github.com/kamil-s-solecki/haze/http"
+	"github.com/kamil-s-solecki/haze/mutable"
 	"github.com/kamil-s-solecki/haze/testutils"
 	"testing"
 )
@@ -9,7 +10,7 @@ import (
 func TestEmpty(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{}, []Mutable{})
+	got := Mutate(rq, []Mutation{}, []mutable.Mutable{})
 
 	testutils.AssertEmpty(t, got)
 }
@@ -17,7 +18,7 @@ func TestEmpty(t *testing.T) {
 func TestApplySingleQuotesMutationToPath(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{Path})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.Path})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Path, "/somepath'")
@@ -27,7 +28,7 @@ func TestApplySingleQuotesMutationToPath(t *testing.T) {
 func TestApplyDoubleQuotesMutationToPath(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Path})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Path})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Path, "/somepath%22")
@@ -36,7 +37,7 @@ func TestApplyDoubleQuotesMutationToPath(t *testing.T) {
 
 func TestApplySingleQuotesMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=bar'")
@@ -46,7 +47,7 @@ func TestApplySingleQuotesMutationToParameter(t *testing.T) {
 func TestApplyDoubleQuotesMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=bar%22")
@@ -56,7 +57,7 @@ func TestApplyDoubleQuotesMutationToParameter(t *testing.T) {
 func TestApplyDoubleQuotesMutationToBothParameters(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar&baz=quix HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 2)
 	testutils.AssertEquals(t, got[0].Query, "foo=bar%22&baz=quix")
@@ -68,7 +69,7 @@ func TestApplyDoubleQuotesMutationToBothParameters(t *testing.T) {
 func TestDoNothingForEmptyQuery(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -76,7 +77,7 @@ func TestDoNothingForEmptyQuery(t *testing.T) {
 func TestDoNothingForEmptyBody(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.BodyParameter})
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -84,7 +85,7 @@ func TestDoNothingForEmptyBody(t *testing.T) {
 func TestDoNothingForNonFormUrlencodedBody(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n\"bar\""))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.BodyParameter})
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -92,7 +93,7 @@ func TestDoNothingForNonFormUrlencodedBody(t *testing.T) {
 func TestApplyDoubleQuotesMutationToBodyParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.BodyParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=bar%22"))
@@ -101,7 +102,7 @@ func TestApplyDoubleQuotesMutationToBodyParameter(t *testing.T) {
 func TestApplySingleQuotesMutationToBodyParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{BodyParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.BodyParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=bar'"))
@@ -110,7 +111,7 @@ func TestApplySingleQuotesMutationToBodyParameter(t *testing.T) {
 func TestApplySstiFuzzMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{SstiFuzz}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{SstiFuzz}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=bar${{<%25[%25'%22}}%25%5c.")
@@ -120,7 +121,7 @@ func TestApplySstiFuzzMutationToParameter(t *testing.T) {
 func TestApplyDoubleQuotesMutationToHeader(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Header})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Header})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar\"")
@@ -129,7 +130,7 @@ func TestApplyDoubleQuotesMutationToHeader(t *testing.T) {
 func TestApplySstiFuzzMutationToHeader(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nFoo:bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{SstiFuzz}, []Mutable{Header})
+	got := Mutate(rq, []Mutation{SstiFuzz}, []mutable.Mutable{mutable.Header})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar${{<%[%'\"}}%\\.")
@@ -138,7 +139,7 @@ func TestApplySstiFuzzMutationToHeader(t *testing.T) {
 func TestApplyDoubleQuotesMutationToCookie(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nCookie: foo=bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Cookie})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Cookie})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Cookies["foo"], "bar%22")
@@ -147,7 +148,7 @@ func TestApplyDoubleQuotesMutationToCookie(t *testing.T) {
 func TestSkipCertainHeaders(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost: bar\r\nConnection: bar\r\nContent-Type: bar\r\nContent-Length: bar\r\nAccept-Encoding: bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Header})
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.Header})
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -155,7 +156,7 @@ func TestSkipCertainHeaders(t *testing.T) {
 func TestApplyNegativeMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Negative}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{Negative}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=-123")
@@ -165,7 +166,7 @@ func TestApplyNegativeMutationToParameter(t *testing.T) {
 func TestApplyNegativeMutationToPath(t *testing.T) {
 	rq := http.Parse([]byte("GET /123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Negative}, []Mutable{Path})
+	got := Mutate(rq, []Mutation{Negative}, []mutable.Mutable{mutable.Path})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Path, "/-123")
@@ -175,7 +176,7 @@ func TestApplyNegativeMutationToPath(t *testing.T) {
 func TestApplyMinusOneMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{MinusOne}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{MinusOne}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=123-1")
@@ -185,7 +186,7 @@ func TestApplyMinusOneMutationToParameter(t *testing.T) {
 func TestApplyTimesSevenMutationToParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{TimesSeven}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{TimesSeven}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=123*7")
@@ -195,7 +196,7 @@ func TestApplyTimesSevenMutationToParameter(t *testing.T) {
 func TestDoNothingWithNonJsonBody(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -203,7 +204,7 @@ func TestDoNothingWithNonJsonBody(t *testing.T) {
 func TestApplySingleQuotesMutationToJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":\"bar\"}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("{\"foo\":\"bar'\"}"))
@@ -212,7 +213,7 @@ func TestApplySingleQuotesMutationToJsonParameter(t *testing.T) {
 func TestApplySingleQuotesMutationToNumericJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\": 3}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("{\"foo\":\"3'\"}"))
@@ -221,7 +222,7 @@ func TestApplySingleQuotesMutationToNumericJsonParameter(t *testing.T) {
 func TestApplySingleQuotesMutationToANestedJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":{\"bar\":\"baz\"}}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":{"bar":"baz'"}}`))
@@ -230,7 +231,7 @@ func TestApplySingleQuotesMutationToANestedJsonParameter(t *testing.T) {
 func TestApplySingleQuotesMutationToANestedArrayJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":[\"bar\"]}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":["bar'"]}`))
@@ -239,7 +240,7 @@ func TestApplySingleQuotesMutationToANestedArrayJsonParameter(t *testing.T) {
 func TestApplySingleQuotesMutationToAllValuesInANestedArrayJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":[\"bar\",\"baz\"]}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 2)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":["bar'","baz"]}`))
@@ -249,7 +250,7 @@ func TestApplySingleQuotesMutationToAllValuesInANestedArrayJsonParameter(t *test
 func TestApplySingleQuotesMutationToANestedJsonInNestedArrayJsonParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":[{\"bar\":\"baz\"}]}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":[{"bar":"baz'"}]}`))
@@ -258,7 +259,7 @@ func TestApplySingleQuotesMutationToANestedJsonInNestedArrayJsonParameter(t *tes
 func TestApplySingleQuotesMutationToANestedArrayJsonNumericParameter(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":[123]}"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":["123'"]}`))
@@ -267,7 +268,7 @@ func TestApplySingleQuotesMutationToANestedArrayJsonNumericParameter(t *testing.
 func TestApplySingleQuotesMutationToAnArrayJson(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n[\"bar\"]"))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`["bar'"]`))
@@ -276,7 +277,7 @@ func TestApplySingleQuotesMutationToAnArrayJson(t *testing.T) {
 func TestApplySingleQuotesMutationToAStringJson(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n\"bar\""))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`"bar'"`))
@@ -285,7 +286,7 @@ func TestApplySingleQuotesMutationToAStringJson(t *testing.T) {
 func TestApplyBracketsMutationToHeader(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Brackets}, []Mutable{Header})
+	got := Mutate(rq, []Mutation{Brackets}, []mutable.Mutable{mutable.Header})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar)]}>")
@@ -294,7 +295,7 @@ func TestApplyBracketsMutationToHeader(t *testing.T) {
 func TestApplyBacktickMutationToHeader(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Backtick}, []Mutable{Header})
+	got := Mutate(rq, []Mutation{Backtick}, []mutable.Mutable{mutable.Header})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar`")
@@ -303,7 +304,7 @@ func TestApplyBacktickMutationToHeader(t *testing.T) {
 func TestApplyCommaMutationToHeader(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Comma}, []Mutable{Header})
+	got := Mutate(rq, []Mutation{Comma}, []mutable.Mutable{mutable.Header})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar,")
@@ -312,7 +313,7 @@ func TestApplyCommaMutationToHeader(t *testing.T) {
 func TestApplyArraizeToQueryParameter(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Arraize}, []Mutable{ParameterName})
+	got := Mutate(rq, []Mutation{Arraize}, []mutable.Mutable{mutable.ParameterName})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo[]=bar")
@@ -322,7 +323,7 @@ func TestApplyArraizeToQueryParameter(t *testing.T) {
 func TestShouldNotArraizeQueryParamVal(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
 
-	got := Mutate(rq, []Mutation{Arraize}, []Mutable{Parameter})
+	got := Mutate(rq, []Mutation{Arraize}, []mutable.Mutable{mutable.Parameter})
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -330,7 +331,7 @@ func TestShouldNotArraizeQueryParamVal(t *testing.T) {
 func TestApplyArraizeToBodyParameterName(t *testing.T) {
 	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
 
-	got := Mutate(rq, []Mutation{Arraize}, []Mutable{BodyParameterName})
+	got := Mutate(rq, []Mutation{Arraize}, []mutable.Mutable{mutable.BodyParameterName})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("foo[]=bar"))
@@ -341,7 +342,7 @@ func TestApplySingleQuotesMutationToMultipartFormParameter(t *testing.T) {
 	body := []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n")
 	rq := http.Parse(append(head, body...))
 
-	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{MultipartFormParameter})
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.MultipartFormParameter})
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar'\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n"))
