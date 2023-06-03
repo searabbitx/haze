@@ -130,32 +130,6 @@ func copySlice(b []byte, start, end int) []byte {
 	return result
 }
 
-var Header = Mutable{"Header", header}
-
-func header(rq http.Request, trans func(string) string) []http.Request {
-	result := []http.Request{}
-	for key, val := range rq.Headers {
-		switch key {
-		case "Content-Type", "Accept-Encoding", "Content-Encoding",
-			"Connection", "Content-Length", "Host":
-			continue
-		}
-		result = append(result, rq.WithHeader(key, trans(val)))
-	}
-	return result
-}
-
-var Cookie = Mutable{"Cookie", cookie}
-
-func cookie(rq http.Request, trans func(string) string) []http.Request {
-	result := []http.Request{}
-	for key, val := range rq.Cookies {
-		enc := urlEncodeSpecials(trans(val))
-		result = append(result, rq.WithCookie(key, enc))
-	}
-	return result
-}
-
 func AllMutatables() []Mutable {
 	return []Mutable{Path, Parameter, ParameterName, BodyParameter, BodyParameterName, MultipartFormParameter, Header, Cookie, JsonParameter}
 }
