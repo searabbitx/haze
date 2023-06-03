@@ -19,14 +19,6 @@ func urlEncodeSpecials(val string) string {
 	return val
 }
 
-var Path = Mutable{"Path", path}
-
-func path(rq http.Request, trans func(string) string) []http.Request {
-	noLeadingSlash := rq.Path[1:]
-	val := urlEncodeSpecials(trans(noLeadingSlash))
-	return []http.Request{rq.WithPath("/" + val)}
-}
-
 var Parameter = Mutable{"Parameter", parameter}
 
 func parameter(rq http.Request, trans func(string) string) []http.Request {
