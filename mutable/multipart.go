@@ -10,16 +10,25 @@ var MultipartFormParameter = Mutable{"MultipartFormParameter", multipartFormPara
 
 func multipartFormParameter(rq http.Request, trans func(string) string) []http.Request {
 	boundary := extractBoundary(rq)
+	return []http.Request{rq.WithBody(mutateNextValue(rq.Body, boundary, trans))}
+}
+
+func mutateNextValue(body, boundary []byte, trans func(string) string) []byte {
+	start, end := findValueRange(body, boundary)
+	val := copySlice(body, start, end)
+	val = []byte(trans(string(val)))
+
+	result := copySlice(body, 0, start)
+	result = append(result, val...)
+	result = append(result, copySlice(body, end, len(body))...)
+	return result
+}
+
+func findValueRange(body, boundary []byte) (int, int) {
 	twoRns := []byte("\r\n\r\n")
-	start := bytes.Index(rq.Body, twoRns) + len(twoRns)
-	end := bytes.Index(rq.Body[start:], boundary) + start
-
-	mut := copySlice(rq.Body, 0, start)
-	val := copySlice(rq.Body, start, end)
-	mut = append(mut, []byte(trans(string(val)))...)
-	mut = append(mut, copySlice(rq.Body, end, len(rq.Body))...)
-
-	return []http.Request{rq.WithBody(mut)}
+	start := bytes.Index(body, twoRns) + len(twoRns)
+	end := bytes.Index(body[start:], boundary) + start
+	return start, end
 }
 
 func extractBoundary(rq http.Request) []byte {
