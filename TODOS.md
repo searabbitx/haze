@@ -11,5 +11,5 @@
 - [x] handle `multipart/form-data`
 - [x] add a parameter to array mutation ( foo=bar -> foo[]=bar )
 - [x] split mutation and mutable into multiple files
+- [x] create some sane README
 - [ ] parse HARs
-- [ ] create some sane README
