@@ -22,7 +22,7 @@ make format
 - [x] make a custom help message to group flags 
 - [x] error handling for conection refused etc
 - [x] parallel requests!
+- [x] handle `multipart/form-data`
+- [x] add a parameter to array mutation ( foo=bar -> foo[]=bar )
+- [x] split mutation and mutable into multiple files
 - [ ] parse HARs
-- [ ] handle `multipart/form-data`
-- [ ] add a parameter to array mutation ( foo=bar -> foo[]=bar )
-- [ ] split mutation and mutable into multiple files
