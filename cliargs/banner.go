@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	keyLen = 16
+	keyLen = 18
 )
 
 func PrintBanner() {
