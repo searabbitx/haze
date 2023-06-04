@@ -1,5 +1,5 @@
 # Haze
-A point-and-shoot web fuzzer to quickly identify crashes and weird behaviours.
+An easy to use point-and-shoot web fuzzer to quickly identify crashes and weird behaviours.
 
 It's purpose is to point your attention to parameters, headers etc. which may prove to be vulnerable upon further analysis.
 
