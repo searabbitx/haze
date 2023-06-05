@@ -108,16 +108,16 @@ func validateHost(host string) {
 }
 
 func validateRequests(rqs []string) {
+	if len(rqs) == 0 {
+		err("The request file(s) is required")
+	}
+
 	for _, rq := range rqs {
 		validateRequest(rq)
 	}
 }
 
 func validateRequest(request string) {
-	if request == "" {
-		err("The request file (-r, -request) is required")
-	}
-
 	fi, e := os.Stat(request)
 	if e != nil {
 		err("Cannot read: " + request)

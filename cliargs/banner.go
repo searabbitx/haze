@@ -20,13 +20,10 @@ func PrintInfo(args Args, reportDir string) {
 	PrintBanner()
 	entries := []entry{
 		{"Target", args.Host},
-		{"Request file", args.RequestFiles[0]},
 	}
 
-	if reportDir != "" {
-		entries = append(entries, entry{"Report dir", reportDir})
-	}
 	if !args.ProbeOnly {
+		entries = append(entries, entry{"Report dir", reportDir})
 		entries = append(entries, entry{"Threads", strconv.Itoa(args.Threads)})
 	}
 
