@@ -9,7 +9,7 @@ import (
 
 type Args struct {
 	Host          string
-	RequestFile   string
+	RequestFiles  []string
 	OutputDir     string
 	Threads       int
 	MatchCodes    string
@@ -29,7 +29,6 @@ type Param struct {
 func ParseArgs() Args {
 	args := Args{}
 	stringVar("GENERAL", &args.Host, Param{Long: "host", Short: "t", Help: "Target host (protocol://hostname:port)"})
-	stringVar("GENERAL", &args.RequestFile, Param{Long: "request", Short: "r", Help: "File containing the raw http request"})
 	boolVar("GENERAL", &args.ProbeOnly, Param{Long: "probe", Short: "p", Help: "Send the probe request only"})
 	stringVar("GENERAL", &args.OutputDir, Param{Long: "output", Short: "o", Help: "Directory where the report will be created. (Default: cwd)"})
 	intVar("GENERAL", &args.Threads, Param{Long: "threads", Short: "th", Default: 10, Help: "Number of threads to use for fuzzing"})
@@ -45,6 +44,7 @@ func ParseArgs() Args {
 	flag.Usage = printUsage
 
 	flag.Parse()
+	args.RequestFiles = flag.Args()
 
 	validate(args)
 
@@ -90,7 +90,7 @@ func boolVar(group string, pvar *bool, param Param) {
 
 func validate(args Args) {
 	validateHost(args.Host)
-	validateRequest(args.RequestFile)
+	validateRequests(args.RequestFiles)
 	validateRange(args.MatchCodes)
 	validateRange(args.MatchLengths)
 	validateOutput(args.OutputDir)
@@ -104,6 +104,12 @@ func validateHost(host string) {
 	r, _ := regexp.Compile("^https?://([-a-zA-Z.]{1,256})(:[0-9]{1,5})?/?$")
 	if !r.MatchString(host) {
 		err("The target host should be in format: protocol://hostname:port")
+	}
+}
+
+func validateRequests(rqs []string) {
+	for _, rq := range rqs {
+		validateRequest(rq)
 	}
 }
 

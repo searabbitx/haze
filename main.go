@@ -57,7 +57,7 @@ func main() {
 	ErrorLog = log.New(os.Stdout, "ERROR: ", 0)
 	args := cliargs.ParseArgs()
 
-	rq := http.Parse(readRawRequest(args.RequestFile))
+	rq := http.Parse(readRawRequest(args.RequestFiles[0]))
 	if args.ProbeOnly {
 		cliargs.PrintInfo(args, "")
 		probe(rq, args.Host)

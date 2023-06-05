@@ -20,7 +20,7 @@ func PrintInfo(args Args, reportDir string) {
 	PrintBanner()
 	entries := []entry{
 		{"Target", args.Host},
-		{"Request file", args.RequestFile},
+		{"Request file", args.RequestFiles[0]},
 	}
 
 	if reportDir != "" {
