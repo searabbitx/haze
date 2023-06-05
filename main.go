@@ -56,13 +56,11 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 func main() {
 	ErrorLog = log.New(os.Stdout, "ERROR: ", 0)
 	args := cliargs.ParseArgs()
+	http.SetupTransport(args.Proxy)
 
 	reportDir := ""
 	if !args.ProbeOnly {
 		reportDir = report.MakeReportDir(args.OutputDir)
-	}
-	if args.Proxy != "" {
-		http.SetupProxy(args.Proxy)
 	}
 	cliargs.PrintInfo(args, reportDir)
 	
