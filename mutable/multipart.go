@@ -9,12 +9,16 @@ import (
 var MultipartFormParameter = Mutable{"MultipartFormParameter", multipartFormParameter}
 
 func multipartFormParameter(rq http.Request, trans func(string) string) []http.Request {
+	result := []http.Request{}
+	if !rq.HasMultipartFormBody() {
+		return result
+	}
+
 	boundary := extractBoundary(rq)
 	next := func(from int) ([]byte, int) {
 		return mutateNextValue(rq.Body, boundary, from, trans)
 	}
 
-	result := []http.Request{}
 	for mut, i := next(0); i != -1; mut, i = next(i) {
 		result = append(result, rq.WithBody(mut))
 	}
