@@ -12,9 +12,14 @@ haze -t https://targetapp.local -r request_from_burp.txt
 
 ### Full list of options:
 ```
+USAGE:
+  haze [OPTION]... [REQUEST_FILE]...
+
+ARGS:
+  REQUEST_FILE    File(s) containing the raw http request(s)
+
 GENERAL:
   -host, -t       Target host (protocol://hostname:port)
-  -request, -r    File containing the raw http request
   -probe, -p      Send the probe request only. (Default: false)
   -output, -o     Directory where the report will be created. (Default: cwd)
   -threads, -th   Number of threads to use for fuzzing. (Default: 10)
