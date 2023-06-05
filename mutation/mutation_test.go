@@ -423,3 +423,19 @@ func TestNotApplyWhitespacesToHeaders(t *testing.T) {
 
 	testutils.AssertLen(t, got, 0)
 }
+
+func TestSemicolonCsv(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{SemicolonCsv}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=bar%3bbar")
+}
+
+func TestColon(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{Colon}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=bar:bar")
+}
