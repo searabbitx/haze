@@ -4,10 +4,10 @@ An easy to use point-and-shoot web fuzzer to quickly identify crashes and weird 
 It's purpose is to point your attention to parameters, headers etc. which may prove to be vulnerable upon further analysis.
 
 ## Usage
-Save a request of interest in a file (for example by using burp's 'save to file' feature) and point haze to fuzz all the parameters and headers with predefined payloads. All responses identified as crashes will be reported.
+Save requests of interest in files (for example by using burp's 'save to file' feature) and point haze to fuzz all the parameters and headers with predefined payloads. All responses identified as crashes will be reported.
 
 ```bash
-haze -t https://targetapp.local -r request_from_burp.txt
+haze -t https://targetapp.local burp_reqs/*.txt
 ```
 
 ### Full list of options:
