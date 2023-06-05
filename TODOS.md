@@ -13,3 +13,4 @@
 - [x] split mutation and mutable into multiple files
 - [x] create some sane README
 - [ ] parse HARs
+- [ ] handle https (invalid certs)
