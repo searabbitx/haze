@@ -29,7 +29,7 @@ func parameterName(rq http.Request, trans func(string) string) []http.Request {
 		return result
 	}
 	do := func(key, val string) (string, string) {
-		return trans(key), val
+		return urlEncodeSpecials(trans(key)), val
 	}
 	for _, q := range applyToEachParam(rq.Query, do) {
 		result = append(result, rq.WithQuery(q))
@@ -61,7 +61,7 @@ func bodyParameterName(rq http.Request, trans func(string) string) []http.Reques
 		return result
 	}
 	do := func(key, val string) (string, string) {
-		return trans(key), val
+		return urlEncodeSpecials(trans(key)), val
 	}
 	for _, q := range applyToEachParam(string(rq.Body), do) {
 		result = append(result, rq.WithBody([]byte(q)))
