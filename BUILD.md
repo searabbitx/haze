@@ -1,7 +1,13 @@
 # Building
-### Build
+
+### Build for the current platform
 ```bash
 make build
+```
+
+### Build for all platforms
+```bash
+make all
 ```
 
 ### Format code
