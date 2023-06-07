@@ -8,11 +8,8 @@ haze: $(SRCS)
 
 all: build/haze_linux_amd64 build/haze_linux_386
 
-build/haze_linux_amd64: $(SRCS)
-	env GOOS=linux GOARCH=amd64 go build -o build/haze_linux_amd64 $(GOFLAGS) .
-
-build/haze_linux_386: $(SRCS)
-	env GOOS=linux GOARCH=386 go build -o build/haze_linux_386 $(GOFLAGS) .
+build/haze_%: $(SRCS)
+	env GOOS=$(word 1,$(subst _, ,$*)) GOARCH=$(word 2,$(subst _, ,$*)) go build -o $@ $(GOFLAGS) .
 
 .PHONY: format
 format:
