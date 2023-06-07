@@ -132,7 +132,7 @@ func TestShouldReportWhenStringMatches(t *testing.T) {
 	testutils.AssertTrue(t, got)
 }
 
-func TestShouldNotReportWhenStringDoesNotMatche(t *testing.T) {
+func TestShouldNotReportWhenStringDoesNotMatch(t *testing.T) {
 	res := http.Response{Raw: []byte("foo bad baz")}
 
 	got := IsReportable(res, []Matcher{MatchString("bar")}, []Filter{})
