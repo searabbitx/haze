@@ -145,13 +145,13 @@ func TestShouldNotReportWhenStringFilters(t *testing.T) {
 
 	got := IsReportable(res, []Matcher{MatchCodes("500")}, []Filter{FilterString("bar")})
 
-	testutils.AssertTrue(t, got)
+	testutils.AssertFalse(t, got)
 }
 
 func TestShouldReportWhenStringDoesNotFilter(t *testing.T) {
-	res := http.Response{Code: 500, Raw: []byte("foo ban baz")}
+	res := http.Response{Code: 400, Raw: []byte("foo ban baz")}
 
-	got := IsReportable(res, []Matcher{MatchCodes("500")}, []Filter{FilterString("bar")})
+	got := IsReportable(res, []Matcher{MatchCodes("400-599")}, []Filter{FilterString("bar"), FilterCodes("404")})
 
-	testutils.AssertFalse(t, got)
+	testutils.AssertTrue(t, got)
 }

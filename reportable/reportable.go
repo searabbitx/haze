@@ -50,7 +50,7 @@ func FilterLengths(lens string) Filter {
 
 func FilterString(str string) Filter {
 	return func(res http.Response) bool {
-		return bytes.Contains(res.Raw, []byte(str))
+		return !bytes.Contains(res.Raw, []byte(str))
 	}
 }
 
