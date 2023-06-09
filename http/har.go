@@ -37,6 +37,8 @@ func entryToRequest(entry map[string]interface{}) Request {
 	return Request{
 		Method:     extractMethod(entry),
 		RequestUri: extractRequestUri(entry),
+		Path:       extractPath(entry),
+		Query:      extractQuery(entry),
 	}
 }
 
@@ -47,6 +49,16 @@ func extractMethod(entry map[string]interface{}) string {
 func extractRequestUri(entry map[string]interface{}) string {
 	url := extractUrl(entry)
 	return url.Path + "?" + url.RawQuery
+}
+
+func extractPath(entry map[string]interface{}) string {
+	url := extractUrl(entry)
+	return url.Path
+}
+
+func extractQuery(entry map[string]interface{}) string {
+	url := extractUrl(entry)
+	return url.RawQuery
 }
 
 func extractUrl(entry map[string]interface{}) *url.URL {

@@ -30,4 +30,6 @@ func TestParseGetRequestFromHar(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Method, "GET")
 	testutils.AssertEquals(t, got[0].RequestUri, "/?foo=bar")
+	testutils.AssertEquals(t, got[0].Path, "/")
+	testutils.AssertEquals(t, got[0].Query, "foo=bar")
 }
