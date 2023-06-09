@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"net/url"
 )
 
 func ParseHar(data []byte) []Request {
@@ -26,20 +27,29 @@ func unmarshalData(data []byte) map[string]interface{} {
 func forEachEntry(har map[string]interface{}, do func(map[string]interface{})) {
 	log := har["log"].(map[string]interface{})
 	entries := log["entries"].([]interface{})
-	for _, entry := range entries {
-		do(entry.(map[string]interface{}))
+	for _, e := range entries {
+		erq := e.(map[string]interface{})["request"]
+		do(erq.(map[string]interface{}))
 	}
 }
 
 func entryToRequest(entry map[string]interface{}) Request {
-	method := extractMethod(entry)
-	return Request{Method: method}
-}
-
-func extractRequest(entry map[string]interface{}) map[string]interface{} {
-	return entry["request"].(map[string]interface{})
+	return Request{
+		Method:     extractMethod(entry),
+		RequestUri: extractRequestUri(entry),
+	}
 }
 
 func extractMethod(entry map[string]interface{}) string {
-	return extractRequest(entry)["method"].(string)
+	return entry["method"].(string)
+}
+
+func extractRequestUri(entry map[string]interface{}) string {
+	url := extractUrl(entry)
+	return url.Path + "?" + url.RawQuery
+}
+
+func extractUrl(entry map[string]interface{}) *url.URL {
+	url, _ := url.Parse(entry["url"].(string))
+	return url
 }
