@@ -28,4 +28,5 @@ func TestParseGetRequestFromHar(t *testing.T) {
 	got := ParseHar(har)
 
 	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Method, "GET")
 }
