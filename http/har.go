@@ -3,14 +3,18 @@ package http
 import (
 	"encoding/json"
 	"net/url"
+	"strings"
 )
 
-func ParseHar(data []byte) []Request {
+func ParseHar(data []byte, target string) []Request {
 	har := unmarshalData(data)
 
 	result := []Request{}
 	forEachEntry(har, func(entry map[string]interface{}) {
-		result = append(result, entryToRequest(entry))
+		entryUrl := extractHarUrl(entry).String()
+		if strings.HasPrefix(entryUrl, target) {
+			result = append(result, entryToRequest(entry))
+		}
 	})
 	return result
 }
