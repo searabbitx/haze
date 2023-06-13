@@ -8,13 +8,14 @@ import (
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/mutable"
 	"github.com/kamil-s-solecki/haze/mutation"
-	"github.com/kamil-s-solecki/haze/progress"
 	"github.com/kamil-s-solecki/haze/report"
 	"github.com/kamil-s-solecki/haze/reportable"
 	"github.com/kamil-s-solecki/haze/workerpool"
+	"github.com/kamil-s-solecki/haze/gui"
 )
 
 var ErrorLog *log.Logger
+var agui gui.Gui
 
 func readRawRequest(rqPath string) []byte {
 	rawRq, _ := os.ReadFile(rqPath)
@@ -32,7 +33,7 @@ func probe(rq http.Request, addr string) {
 func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 	matchers, filters := reportable.FromArgs(args)
 	muts := mutation.Mutate(rq, mutation.AllMutations(), mutable.AllMutatables())
-	bar := progress.Start(len(muts))
+	bar := agui.ProgressBar(len(muts))
 	pool := workerpool.NewPool(args.Threads)
 
 	for  _, mut := range muts {
@@ -64,6 +65,7 @@ func parseRequestsFromFile(rfile string, args cliargs.Args) []http.Request {
 
 func main() {
 	ErrorLog = log.New(os.Stdout, "ERROR: ", 0)
+	agui = gui.Create()
 	args := cliargs.ParseArgs()
 	http.SetupTransport(args.Proxy)
 
@@ -74,13 +76,12 @@ func main() {
 	cliargs.PrintInfo(args, reportDir)
 	
 	for _, rfile := range args.RequestFiles {
-		fmt.Printf("... ( %v ) ...\n", rfile)
+		agui.FuzzNewFile(rfile)
 		for _, rq := range parseRequestsFromFile(rfile, args) {
-			fmt.Printf("      %v %v\n", rq.Method, rq.RequestUri)
-			fmt.Printf("      ---\n")
+			agui.FuzzNewRequest(rq)
 			probe(rq, args.Host)
 			if args.ProbeOnly {
-				fmt.Println()
+				agui.EmptyLine()
 			} else {
 				fuzz(args, rq, reportDir)
 			}
