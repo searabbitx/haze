@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -45,4 +46,17 @@ func (b Bar) spinner() byte {
 
 func (b Bar) String() string {
 	return fmt.Sprintf("     %c [ %v / %v ] %c", b.spinner(), b.curr, b.total, b.spinner())
+}
+
+func (b Bar) End() {
+	defer b.mu.Unlock()
+	b.mu.Lock()
+	b.clear()
+}
+
+func (b Bar) clear() {
+	defer b.buff.Flush()
+	spaces := strings.Repeat(" ", len(b.String()))
+	fmt.Fprint(b.buff, "\033[30D\033[0K", spaces, "\033[30D")
+	fmt.Fprint(b.buff, "\n")
 }
