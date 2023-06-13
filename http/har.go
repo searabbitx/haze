@@ -35,40 +35,41 @@ func forEachEntry(har map[string]interface{}, do func(map[string]interface{})) {
 
 func entryToRequest(entry map[string]interface{}) Request {
 	return Request{
-		Method:     extractMethod(entry),
-		RequestUri: extractRequestUri(entry),
-		Path:       extractPath(entry),
-		Query:      extractQuery(entry),
-		Cookies:    extractCookies(entry),
-		Headers:    extractHeaders(entry),
+		Method:     extractHarMethod(entry),
+		RequestUri: extractHarRequestUri(entry),
+		Path:       extractHarPath(entry),
+		Query:      extractHarQuery(entry),
+		Cookies:    extractHarCookies(entry),
+		Headers:    extractHarHeaders(entry),
+		Body:       extractHarBody(entry),
 	}
 }
 
-func extractMethod(entry map[string]interface{}) string {
+func extractHarMethod(entry map[string]interface{}) string {
 	return entry["method"].(string)
 }
 
-func extractRequestUri(entry map[string]interface{}) string {
-	url := extractUrl(entry)
+func extractHarRequestUri(entry map[string]interface{}) string {
+	url := extractHarUrl(entry)
 	return url.Path + "?" + url.RawQuery
 }
 
-func extractPath(entry map[string]interface{}) string {
-	url := extractUrl(entry)
+func extractHarPath(entry map[string]interface{}) string {
+	url := extractHarUrl(entry)
 	return url.Path
 }
 
-func extractQuery(entry map[string]interface{}) string {
-	url := extractUrl(entry)
+func extractHarQuery(entry map[string]interface{}) string {
+	url := extractHarUrl(entry)
 	return url.RawQuery
 }
 
-func extractUrl(entry map[string]interface{}) *url.URL {
+func extractHarUrl(entry map[string]interface{}) *url.URL {
 	url, _ := url.Parse(entry["url"].(string))
 	return url
 }
 
-func extractCookies(entry map[string]interface{}) map[string]string {
+func extractHarCookies(entry map[string]interface{}) map[string]string {
 	result := map[string]string{}
 
 	cookies := entry["cookies"].([]interface{})
@@ -82,7 +83,7 @@ func extractCookies(entry map[string]interface{}) map[string]string {
 	return result
 }
 
-func extractHeaders(entry map[string]interface{}) map[string]string {
+func extractHarHeaders(entry map[string]interface{}) map[string]string {
 	result := map[string]string{}
 
 	headers := entry["headers"].([]interface{})
@@ -99,4 +100,12 @@ func extractHeaders(entry map[string]interface{}) map[string]string {
 	}
 
 	return result
+}
+
+func extractHarBody(entry map[string]interface{}) []byte {
+	postData, ok := entry["postData"].(map[string]interface{})
+	if !ok {
+		return []byte{}
+	}
+	return []byte(postData["text"].(string))
 }

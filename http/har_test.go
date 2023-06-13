@@ -35,3 +35,13 @@ func TestParseGetRequestFromHar(t *testing.T) {
 	testutils.AssertMapEquals(t, got[0].Cookies, map[string]string{"foocookie": "barcookie"})
 	testutils.AssertMapEquals(t, got[0].Headers, map[string]string{"User-Agent": "Fooagent", "X-Custom": "foocustom"})
 }
+
+func TestParsePostRequestFromHar(t *testing.T) {
+	har := readHar("../var/hars/post.har")
+
+	got := ParseHar(har)
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Method, "POST")
+	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=val1&bar=val2"))
+}
