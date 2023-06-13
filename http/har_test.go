@@ -32,4 +32,5 @@ func TestParseGetRequestFromHar(t *testing.T) {
 	testutils.AssertEquals(t, got[0].RequestUri, "/?foo=bar")
 	testutils.AssertEquals(t, got[0].Path, "/")
 	testutils.AssertEquals(t, got[0].Query, "foo=bar")
+	testutils.AssertMapEquals(t, got[0].Cookies, map[string]string{"foocookie": "barcookie"})
 }

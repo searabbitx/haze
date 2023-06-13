@@ -39,6 +39,7 @@ func entryToRequest(entry map[string]interface{}) Request {
 		RequestUri: extractRequestUri(entry),
 		Path:       extractPath(entry),
 		Query:      extractQuery(entry),
+		Cookies:    extractCookies(entry),
 	}
 }
 
@@ -64,4 +65,18 @@ func extractQuery(entry map[string]interface{}) string {
 func extractUrl(entry map[string]interface{}) *url.URL {
 	url, _ := url.Parse(entry["url"].(string))
 	return url
+}
+
+func extractCookies(entry map[string]interface{}) map[string]string {
+	result := map[string]string{}
+
+	cookies := entry["cookies"].([]interface{})
+	for _, cookie := range cookies {
+		cookie := cookie.(map[string]interface{})
+		name := cookie["name"].(string)
+		val := cookie["value"].(string)
+		result[name] = val
+	}
+
+	return result
 }
