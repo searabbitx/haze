@@ -17,6 +17,8 @@ USAGE:
 
 ARGS:
   REQUEST_FILE    File(s) containing the raw http request(s)
+                  in case of .har files pass the -har flag
+                  only the har entries which match the target (-t) value will be fuzzed
 
 GENERAL:
   -host, -t       Target host (protocol://hostname:port)
@@ -24,6 +26,7 @@ GENERAL:
   -output, -o     Directory where the report will be created. (Default: cwd)
   -threads, -th   Number of threads to use for fuzzing. (Default: 10)
   -proxy, -x      Proxy address
+  -har            Indicate that the request files are in the har format. (Default: false)
 
 MATCHERS:
   -mc             Comma-separated list of response codes to report. (Default: 500-599)
