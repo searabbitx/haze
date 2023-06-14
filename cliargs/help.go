@@ -33,7 +33,7 @@ func registerFlag(groupName string, fn flagName) {
 }
 
 func printUsage() {
-	fmt.Println("USAGE:")
+	fmt.Println("\nUSAGE:")
 	fmt.Println("  haze [OPTION]... [REQUEST_FILE]...")
 	fmt.Println("\nARGS:")
 	printArg("REQUEST_FILE", []string{
