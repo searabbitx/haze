@@ -10,10 +10,10 @@ import (
 type Bar struct {
 	curr, total int
 	buff        *bufio.Writer
-	mu          sync.Mutex
+	mu          *sync.Mutex
 }
 
-func Start(total int, buff *bufio.Writer, mu sync.Mutex) Bar {
+func Start(total int, buff *bufio.Writer, mu *sync.Mutex) Bar {
 	b := Bar{curr: 0, total: total, buff: buff, mu: mu}
 	return b
 }
