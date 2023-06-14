@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const (
+	keyLen = 18
+)
+
 type flagName struct {
 	long, short string
 }
@@ -29,7 +33,6 @@ func registerFlag(groupName string, fn flagName) {
 }
 
 func printUsage() {
-	PrintBanner()
 	fmt.Println("USAGE:")
 	fmt.Println("  haze [OPTION]... [REQUEST_FILE]...")
 	fmt.Println("\nARGS:")

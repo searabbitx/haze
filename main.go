@@ -16,6 +16,7 @@ var atui tui.Tui
 
 func main() {
 	atui = tui.Create()
+	atui.PrintBanner()
 	args := cliargs.ParseArgs()
 	http.SetupTransport(args.Proxy)
 
@@ -23,7 +24,7 @@ func main() {
 	if !args.ProbeOnly {
 		reportDir = report.MakeReportDir(args.OutputDir)
 	}
-	cliargs.PrintInfo(args, reportDir)
+	atui.PrintInfo(args, reportDir)
 	
 	for _, rfile := range args.RequestFiles {
 		atui.FuzzNewFile(rfile)
