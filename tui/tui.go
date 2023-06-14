@@ -26,20 +26,19 @@ func Create() Tui {
 }
 
 func (t *Tui) FuzzNewFile(rfile string) {
-	t.printf("... ( %v ) ...\n", rfile)
+	t.printf("<< %v >>\n", rfile)
 }
 
 func (t *Tui) FuzzNewRequest(rq http.Request) {
-	t.printf("      %v %v\n", rq.Method, rq.RequestUri)
-	t.printf("      ---\n")
+	t.printf(" * %v %v\n", rq.Method, rq.RequestUri)
 }
 
 func (t *Tui) Crash(res http.Response, fname string) {
-	t.printf("    ! Crash:       %s (%s)\n", res, fname)
+	t.printf("(!)  Crash:      %s (%s)\n", res, fname)
 }
 
 func (t *Tui) Probe(probe http.Response) {
-	t.printf("      Probe:      %v\n", probe)
+	t.printf("     Probe:      %v\n", probe)
 }
 
 func (t *Tui) EmptyLine() {
@@ -75,6 +74,7 @@ func (t *Tui) PrintInfo(args cliargs.Args, reportDir string) {
 	}
 
 	t.printTable(entries)
+	t.EmptyLine()
 }
 
 func (t *Tui) printf(format string, a ...any) {
