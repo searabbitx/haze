@@ -10,6 +10,12 @@ Save requests of interest in files (for example by using burp's 'save to file' f
 haze -t https://targetapp.local burp_reqs/*.txt
 ```
 
+You can also browse the app without burp and save requests as `.har` files with DevTools. Haze will fuzz only those requests which urls match the target (`-t`).
+
+```bash
+haze -t https://tragetapp.local -har hars/*.har
+```
+
 ### Full list of options:
 ```
 USAGE:
