@@ -51,7 +51,7 @@ func mutateJson(data interface{}, trans func(string) string) [][]byte {
 
 func mutateFlatJson(data *interface{}, trans func(string) string) []JsonMutation {
 	orig := *data
-	return []JsonMutation{JsonMutation{
+	return []JsonMutation{{
 		Apply: func() {
 			*data = trans(fmt.Sprintf("%v", orig))
 		},
