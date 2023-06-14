@@ -96,10 +96,7 @@ func boolVar(group string, pvar *bool, param Param) {
 func validate(args Args) {
 	validateHost(args.Host)
 	validateProxy(args.Proxy)
-	validateRequests(args.RequestFiles)
-	if args.Har {
-		validateJsons(args.RequestFiles)
-	}
+	validateRequests(args.RequestFiles, args.Har)
 	validateRange(args.MatchCodes)
 	validateRange(args.MatchLengths)
 	validateOutput(args.OutputDir)
@@ -127,17 +124,17 @@ func validateProxy(proxy string) {
 	}
 }
 
-func validateRequests(rqs []string) {
+func validateRequests(rqs []string, isHar bool) {
 	if len(rqs) == 0 {
 		err("The request file(s) is required")
 	}
 
 	for _, rq := range rqs {
-		validateRequest(rq)
+		validateRequest(rq, isHar)
 	}
 }
 
-func validateRequest(request string) {
+func validateRequest(request string, isHar bool) {
 	fi, e := os.Stat(request)
 	if e != nil {
 		err("Cannot read: " + request)
@@ -145,14 +142,16 @@ func validateRequest(request string) {
 	if fi.IsDir() {
 		err(request + " is a directory. Please provide a file")
 	}
+
+	if isHar {
+		validateJson(request)
+	}
 }
 
-func validateJsons(rqs []string) {
-	for _, path := range rqs {
-		content, _ := os.ReadFile(path)
-		if !json.Valid(content) {
-			err(path + " is not a valid json")
-		}
+func validateJson(request string) {
+	content, _ := os.ReadFile(request)
+	if !json.Valid(content) {
+		err(request + " is not a valid json")
 	}
 }
 
