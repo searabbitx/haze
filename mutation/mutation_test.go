@@ -466,3 +466,11 @@ func TestApplyJsonNeNosqliMutationToJsonParameter(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("{\"foo\":{\"$ne\":\"bar\"}}"))
 }
+
+func TestNotApplySingleQuoteMutationToJsonParameterRaw(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":\"bar\"}"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.JsonParameterRaw})
+
+	testutils.AssertLen(t, got, 0)
+}

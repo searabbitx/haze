@@ -188,7 +188,12 @@ func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 			return true
 		}
 	default:
-		return true
+		switch mtbl.Name {
+		case mutable.JsonParameterRaw.Name:
+			return false
+		default:
+			return true
+		}
 	}
 }
 
