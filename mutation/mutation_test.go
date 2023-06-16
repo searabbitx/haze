@@ -448,3 +448,12 @@ func TestApplyNeNosqliMutationToParameterName(t *testing.T) {
 	testutils.AssertEquals(t, got[0].Query, "foo[$ne]=bar")
 	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo[$ne]=bar")
 }
+
+func TestApplyBrokenRegexNosqliMutationToParameterName(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{BrokenRegexNosqli}, []mutable.Mutable{mutable.ParameterName})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo[$regex]=[(^=bar")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo[$regex]=[(^=bar")
+}

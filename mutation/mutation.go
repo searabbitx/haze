@@ -128,6 +128,12 @@ func neNosqli(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "[$ne]")
 }
 
+var BrokenRegexNosqli = Mutation{"BrokenRegexNosqli", brokenRegexNosqli}
+
+func brokenRegexNosqli(rq http.Request, mutable mutable.Mutable) []http.Request {
+	return suffixMutation(rq, mutable, "[$regex]=[(^")
+}
+
 func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
@@ -187,5 +193,5 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) [
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
 		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte,
-		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon, NeNosqli}
+		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon, NeNosqli, BrokenRegexNosqli}
 }
