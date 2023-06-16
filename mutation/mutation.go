@@ -150,7 +150,7 @@ func prefixMutation(rq http.Request, mutable mutable.Mutable, prefix string) []h
 
 func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 	switch mutation.name {
-	case Arraize.name, NeNosqli.name:
+	case Arraize.name, NeNosqli.name, BrokenRegexNosqli.name:
 		switch mtbl.Name {
 		case mutable.ParameterName.Name, mutable.BodyParameterName.Name:
 			return true
