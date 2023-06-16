@@ -134,6 +134,15 @@ func brokenRegexNosqli(rq http.Request, mutable mutable.Mutable) []http.Request 
 	return suffixMutation(rq, mutable, "[$regex]=[(^")
 }
 
+var JsonNeNosqli = Mutation{"JsonNeNosqli", jsonNeNosqli}
+
+func jsonNeNosqli(rq http.Request, mutable mutable.Mutable) []http.Request {
+	trans := func(val string) string {
+		return `{"$ne":"` + val + `"}`
+	}
+	return mutable.Apply(rq, trans)
+}
+
 func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
@@ -150,6 +159,13 @@ func prefixMutation(rq http.Request, mutable mutable.Mutable, prefix string) []h
 
 func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 	switch mutation.name {
+	case JsonNeNosqli.name:
+		switch mtbl.Name {
+		case mutable.JsonParameterRaw.Name:
+			return true
+		default:
+			return false
+		}
 	case Arraize.name, NeNosqli.name, BrokenRegexNosqli.name:
 		switch mtbl.Name {
 		case mutable.ParameterName.Name, mutable.BodyParameterName.Name:
@@ -193,5 +209,5 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) [
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
 		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte,
-		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon, NeNosqli, BrokenRegexNosqli}
+		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon, NeNosqli, BrokenRegexNosqli, JsonNeNosqli}
 }
