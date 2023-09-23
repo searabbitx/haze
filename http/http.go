@@ -105,7 +105,7 @@ func parseRawCookies(cookies map[string]string, raw string) {
 	for _, c := range strings.Split(raw, "; ") {
 		key := strings.Split(c, "=")[0]
 		val := strings.Split(c, "=")[1]
-		cookies[key] = val
+		cookies[key] = strings.Replace(val, "\"", "%22", -1)
 	}
 }
 

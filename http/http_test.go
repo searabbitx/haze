@@ -164,6 +164,7 @@ func TestCookies(t *testing.T) {
 	}{
 		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=bar\r\n\r\n"), map[string]string{"foo": "bar"}},
 		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=bar \r\n\r\n"), map[string]string{"foo": "bar"}},
+		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=[\"bar\"] \r\n\r\n"), map[string]string{"foo": "[%22bar%22]"}},
 		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\nCookie:foo=bar; baz=quix\r\n\r\n"),
 			map[string]string{"foo": "bar", "baz": "quix"}},
 	}
