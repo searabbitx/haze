@@ -73,6 +73,10 @@ func (t *Tui) PrintInfo(args cliargs.Args, reportDir string) {
 		entries = append(entries, entry{"Proxy", args.Proxy})
 	}
 
+	if args.Cookies != "" {
+		entries = append(entries, entry{"Cookies", args.Cookies})
+	}
+
 	t.printTable(entries)
 	t.EmptyLine()
 }

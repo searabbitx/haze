@@ -40,17 +40,32 @@ func main() {
 	}
 }
 
-func parseRequestsFromFile(rfile string, args cliargs.Args) []http.Request {
+func parseRequestsFromFile(rfile string, args cliargs.Args) (result []http.Request) {
 	raw := readRawRequest(rfile)
 	if !args.Har {
-		return []http.Request{http.Parse(raw)}
+		result = []http.Request{http.Parse(raw)}
+	} else {
+		result = http.ParseHar(raw, args.Host)
 	}
-	return http.ParseHar(raw, args.Host)
+
+	if args.Cookies != "" {
+		result = overwriteCookies(result, args)
+	}
+
+	return
 }
 
 func readRawRequest(rqPath string) []byte {
 	rawRq, _ := os.ReadFile(rqPath)
 	return rawRq
+}
+
+func overwriteCookies(rqs []http.Request, args cliargs.Args) []http.Request {
+	result := []http.Request{}
+	for _, rq := range rqs {
+		result = append(result, rq.WithCookieString(args.Cookies))
+	}
+	return result
 }
 
 func probe(rq http.Request, addr string) {
