@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
+
+type StringArrayArg []string
 
 type Args struct {
 	Host          string
@@ -15,6 +18,7 @@ type Args struct {
 	OutputDir     string
 	Proxy         string
 	Cookies       string
+	Headers       StringArrayArg
 	Threads       int
 	MatchCodes    string
 	MatchLengths  string
@@ -40,6 +44,7 @@ func ParseArgs() Args {
 	stringVar("GENERAL", &args.Proxy, Param{Long: "proxy", Short: "x", Help: "Proxy address"})
 	boolVar("GENERAL", &args.Har, Param{Long: "har", Help: "Indicate that the request files are in the har format"})
 	stringVar("GENERAL", &args.Cookies, Param{Long: "cookies", Short: "c", Help: "Cookies string. This will replace `Cookie:` header read from request files"})
+	stringArrayVar("GENERAL", &args.Headers, Param{Long: "header", Short: "H", Help: "Header string. It overwrites headers that are already present in request files."})
 
 	stringVar("MATCHERS", &args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar("MATCHERS", &args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
@@ -94,6 +99,23 @@ func boolVar(group string, pvar *bool, param Param) {
 	if param.Short != "" {
 		flag.BoolVar(pvar, param.Short, deflt, "")
 	}
+}
+
+func stringArrayVar(group string, pvar *StringArrayArg, param Param) {
+	registerFlag(group, flagName{param.Long, param.Short})
+	flag.Var(pvar, param.Long, param.Help)
+	if param.Short != "" {
+		flag.Var(pvar, param.Short, "")
+	}
+}
+
+func (saa *StringArrayArg) Set(val string) error {
+	*saa = append(*saa, val)
+	return nil
+}
+
+func (saa *StringArrayArg) String() string {
+	return "[ " + strings.Join(*saa, " ") + " ]"
 }
 
 func validate(args Args) {
