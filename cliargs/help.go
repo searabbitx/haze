@@ -56,7 +56,11 @@ func printFlag(fn flagName, usage, defValue string) {
 		ln += ", -" + fn.short
 	}
 	ln += strings.Repeat(" ", keyLen-len(ln))
-	ln += usage
+	usageLines := strings.Split(usage, "\n")
+	ln += usageLines[0]
+	for _, ul := range usageLines[1:] {
+		ln += "\n" + strings.Repeat(" ", keyLen) + ul
+	}
 	if defValue != "" && defValue != "[  ]" {
 		ln += ". (Default: " + defValue + ")"
 	}
