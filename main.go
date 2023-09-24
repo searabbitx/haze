@@ -52,6 +52,10 @@ func parseRequestsFromFile(rfile string, args cliargs.Args) (result []http.Reque
 		result = overwriteCookies(result, args)
 	}
 
+	if len(args.Headers) > 0 {
+		result = overwriteHeaders(result, args)
+	}
+
 	return
 }
 
@@ -64,6 +68,17 @@ func overwriteCookies(rqs []http.Request, args cliargs.Args) []http.Request {
 	result := []http.Request{}
 	for _, rq := range rqs {
 		result = append(result, rq.WithCookieString(args.Cookies))
+	}
+	return result
+}
+
+func overwriteHeaders(rqs []http.Request, args cliargs.Args) []http.Request {
+	result := []http.Request{}
+	for _, rq := range rqs {
+		for _, h := range args.Headers {
+			rq = rq.WithHeaderString(h)
+		}
+		result = append(result, rq)
 	}
 	return result
 }

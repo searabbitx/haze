@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -75,6 +76,10 @@ func (t *Tui) PrintInfo(args cliargs.Args, reportDir string) {
 
 	if args.Cookies != "" {
 		entries = append(entries, entry{"Cookies", args.Cookies})
+	}
+
+	if len(args.Headers) != 0 {
+		entries = append(entries, entry{"Headers", strings.Join(args.Headers, "\n")})
 	}
 
 	t.printTable(entries)
