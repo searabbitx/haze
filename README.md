@@ -35,7 +35,7 @@ GENERAL:
   -har            Indicate that the request files are in the har format. (Default: false)
   -cookies, -c    Cookies string. This will replace `Cookie:` header read from request files
   -header, -H     Header string. It overwrites headers that are already present in request files.
-                  You can provide multiple values: `-H 'Foo: foo' -H 'Bar: bar'.
+                  You can provide multiple values: `-H 'Foo: foo' -H 'Bar: bar'`.
 
 MATCHERS:
   -mc             Comma-separated list of response codes to report. (Default: 500-599)
