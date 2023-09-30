@@ -283,6 +283,15 @@ func TestApplySingleQuotesMutationToAStringJson(t *testing.T) {
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`"bar'"`))
 }
 
+func TestApplySingleQuotesMutationToJsonParameterInCookie(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nCookie: foo={%22bar%22:%22baz%22}\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.CookieJsonParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Cookies["foo"], "{%22bar%22:%22baz'%22}")
+}
+
 func TestApplyBracketsMutationToHeader(t *testing.T) {
 	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
 

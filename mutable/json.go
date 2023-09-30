@@ -37,7 +37,7 @@ func jsonParameterWithPostProcessing(rq http.Request, trans func(string) string,
 		return []http.Request{}
 	}
 
-	data := decodeJson(rq.Body)
+	data, _ := decodeJson(rq.Body)
 	result := []http.Request{}
 
 	for _, mutJson := range mutateJson(data, trans) {
@@ -138,8 +138,8 @@ func mutateJsonLeaf(data map[string]interface{}, key string, trans func(string) 
 	}
 }
 
-func decodeJson(bs []byte) interface{} {
+func decodeJson(bs []byte) (interface{}, error) {
 	var data interface{}
-	json.Unmarshal(bs, &data)
-	return data
+	err := json.Unmarshal(bs, &data)
+	return data, err
 }

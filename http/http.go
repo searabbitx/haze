@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -88,7 +89,7 @@ func parseHeaders(rawReq []byte) (headers map[string]string) {
 }
 
 func parseHeader(rawHeader []byte) (name, val string) {
-	colonSplitted := bytes.Split(rawHeader, []byte(":"))
+	colonSplitted := bytes.SplitN(rawHeader, []byte(":"), 2)
 	name = string(colonSplitted[0])
 	val = string(colonSplitted[1])
 	val = strings.TrimSpace(val)
@@ -219,6 +220,14 @@ func copyMap(hs map[string]string) map[string]string {
 func (r Request) HasJsonBody() bool {
 	ct, ok := r.Headers["Content-Type"]
 	return ok && ct == "application/json"
+}
+
+func (r Request) HasJsonCookie(key string) bool {
+	cookie, ok := r.Cookies[key]
+	cookie = strings.Replace(cookie, "%22", "\"", -1)
+	var data interface{}
+	err := json.Unmarshal([]byte(cookie), &data)
+	return ok && err == nil
 }
 
 func (r Request) HasFormUrlEncodedBody() bool {
