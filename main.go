@@ -10,6 +10,7 @@ import (
 	"github.com/kamil-s-solecki/haze/progress"
 	"github.com/kamil-s-solecki/haze/report"
 	"github.com/kamil-s-solecki/haze/reportable"
+	"github.com/kamil-s-solecki/haze/workerpool"
 )
 
 var ErrorLog *log.Logger
@@ -31,17 +32,24 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 	matchers, filters := reportable.FromArgs(args)
 	muts := mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables())
 	bar := progress.Start(len(muts))
+
+	pool := workerpool.NewPool(10)
 	for  _, mut := range muts {
-		res, err := mut.Send(args.Host)
-		if err != nil {
-			ErrorLog.Println(err)
+		mut := mut
+		task := func() {
+			res, err := mut.Send(args.Host)
+			if err != nil {
+				ErrorLog.Println(err)
+			}
+			if reportable.IsReportable(res, matchers, filters) {
+				fname := report.Report(mut.Raw(args.Host), res.Raw, reportDir)
+				bar.Log(fmt.Sprintf("-={*}=- Crash!     %s (%s)\n", res, fname))
+			}
+			bar.Next()
 		}
-		if reportable.IsReportable(res, matchers, filters) {
-			fname := report.Report(mut.Raw(args.Host), res.Raw, reportDir)
-			bar.Log(fmt.Sprintf("-={*}=- Crash!     %s (%s)\n", res, fname))
-		}
-		bar.Next()
+		pool.RunTask(task)
 	}
+	pool.Wait()
 }
 
 func main() {
