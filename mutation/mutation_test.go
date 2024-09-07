@@ -359,3 +359,11 @@ func TestApplySingleQuotesMutationToAllMultipartFormParameters(t *testing.T) {
 	testutils.AssertByteEquals(t, got[0].Body, []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar'\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"baz\"\r\n\r\nquix\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n"))
 	testutils.AssertByteEquals(t, got[1].Body, []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"baz\"\r\n\r\nquix'\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n"))
 }
+
+func TestDoNothingForNonMultipartBody(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n\"bar\""))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []mutable.Mutable{mutable.MultipartFormParameter})
+
+	testutils.AssertLen(t, got, 0)
+}

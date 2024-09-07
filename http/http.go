@@ -199,6 +199,11 @@ func (r Request) HasFormUrlEncodedBody() bool {
 	return ok && ct == "application/x-www-form-urlencoded"
 }
 
+func (r Request) HasMultipartFormBody() bool {
+	ct, ok := r.Headers["Content-Type"]
+	return ok && strings.HasPrefix(ct, "multipart/form-data")
+}
+
 func (res Response) String() string {
 	return fmt.Sprintf("[Code: %v, Len: %v]", res.Code, res.Length)
 }
