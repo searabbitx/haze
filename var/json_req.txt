@@ -2,6 +2,7 @@ POST /test HTTP/1.1
 Host: httpbin.org
 User-Agent: foo
 Content-Type: application/json
+X-Custom: someval
 Content-Length: 48
 Connection: close
 

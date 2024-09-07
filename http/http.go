@@ -196,6 +196,13 @@ func (r Request) WithCookieString(val string) Request {
 	return result
 }
 
+func (r Request) WithHeaderString(header string) Request {
+	key, val := parseHeader([]byte(header))
+	result := r.Clone()
+	result.Headers[key] = val
+	return result
+}
+
 func (r Request) Clone() Request {
 	return Request{Method: r.Method, RequestUri: r.RequestUri, Path: r.Path, Query: r.Query,
 		ProtocolVersion: r.ProtocolVersion, Headers: copyMap(r.Headers), Cookies: copyMap(r.Cookies), Body: r.Body}

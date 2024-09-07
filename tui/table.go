@@ -16,7 +16,11 @@ func (t *Tui) printTable(es []entry) {
 	for _, e := range es {
 		ln := "  " + e.key
 		ln += strings.Repeat(" ", keyLen-len(ln))
-		ln += ":  " + e.val
+		values := strings.Split(e.val, "\n")
+		ln += ":  " + values[0]
+		for _, v := range values[1:] {
+			ln += "\n" + strings.Repeat(" ", keyLen) + "   " + v
+		}
 		lns = append(lns, ln)
 		if len(ln) > max {
 			max = len(ln)
