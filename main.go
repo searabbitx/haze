@@ -11,11 +11,6 @@ import (
 )
 
 func readRawRequest(rqPath string) []byte {
-	if _, err := os.Stat(rqPath); err != nil {
-		fmt.Println("Cannot read", rqPath)
-		os.Exit(1)
-	}
-
 	fmt.Println("Request file:", rqPath)
 	rawRq, _ := os.ReadFile(rqPath)
 	return rawRq
