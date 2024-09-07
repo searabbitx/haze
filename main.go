@@ -9,13 +9,13 @@ import (
 	"github.com/kamil-s-solecki/haze/report"
 	"github.com/kamil-s-solecki/haze/reportable"
 	"github.com/kamil-s-solecki/haze/workerpool"
-	"github.com/kamil-s-solecki/haze/gui"
+	"github.com/kamil-s-solecki/haze/tui"
 )
 
-var agui gui.Gui
+var atui tui.Tui
 
 func main() {
-	agui = gui.Create()
+	atui = tui.Create()
 	args := cliargs.ParseArgs()
 	http.SetupTransport(args.Proxy)
 
@@ -26,12 +26,12 @@ func main() {
 	cliargs.PrintInfo(args, reportDir)
 	
 	for _, rfile := range args.RequestFiles {
-		agui.FuzzNewFile(rfile)
+		atui.FuzzNewFile(rfile)
 		for _, rq := range parseRequestsFromFile(rfile, args) {
-			agui.FuzzNewRequest(rq)
+			atui.FuzzNewRequest(rq)
 			probe(rq, args.Host)
 			if args.ProbeOnly {
-				agui.EmptyLine()
+				atui.EmptyLine()
 			} else {
 				fuzz(args, rq, reportDir)
 			}
@@ -55,15 +55,15 @@ func readRawRequest(rqPath string) []byte {
 func probe(rq http.Request, addr string) {
 	probe, err := rq.Send(addr)
 	if err != nil {
-		agui.Fatal(err)
+		atui.Fatal(err)
 	}
-	agui.Probe(probe)
+	atui.Probe(probe)
 }
 
 func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 	matchers, filters := reportable.FromArgs(args)
 	muts := mutation.Mutate(rq, mutation.AllMutations(), mutable.AllMutatables())
-	bar := agui.ProgressBar(len(muts))
+	bar := atui.ProgressBar(len(muts))
 	pool := workerpool.NewPool(args.Threads)
 
 	for  _, mut := range muts {
@@ -71,11 +71,11 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 		task := func() {
 			res, err := mut.Send(args.Host)
 			if err != nil {
-				agui.Error(err)
+				atui.Error(err)
 			}
 			if reportable.IsReportable(res, matchers, filters) {
 				fname := report.Report(mut.Raw(args.Host), res.Raw, reportDir)
-				agui.Crash(res, fname)
+				atui.Crash(res, fname)
 			}
 			bar.Next()
 		}
