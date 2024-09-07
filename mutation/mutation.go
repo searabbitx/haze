@@ -10,59 +10,59 @@ type Mutation struct {
 	apply func(http.Request, mutable.Mutable) []http.Request
 }
 
+var SingleQuotes = Mutation{"SingleQuotes", singleQuotes}
+
 func singleQuotes(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "'")
 }
 
-var SingleQuotes = Mutation{"SingleQuotes", singleQuotes}
+var DoubleQuotes = Mutation{"DoubleQuotes", doubleQuotes}
 
 func doubleQuotes(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "\"")
 }
 
-var DoubleQuotes = Mutation{"DoubleQuotes", doubleQuotes}
+var SstiFuzz = Mutation{"SstiFuzz", sstiFuzz}
 
 func sstiFuzz(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "${{<%[%'\"}}%\\.")
 }
 
-var SstiFuzz = Mutation{"SstiFuzz", sstiFuzz}
+var Negative = Mutation{"Negative", negative}
 
 func negative(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return prefixMutation(rq, mutable, "-")
 }
 
-var Negative = Mutation{"Negative", negative}
+var MinusOne = Mutation{"MinusOne", minusOne}
 
 func minusOne(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "-1")
 }
 
-var MinusOne = Mutation{"MinusOne", minusOne}
+var TimesSeven = Mutation{"TimesSeven", timesSeven}
 
 func timesSeven(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "*7")
 }
 
-var TimesSeven = Mutation{"TimesSeven", timesSeven}
+var Brackets = Mutation{"Brackets", brackets}
 
 func brackets(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ")]}>")
 }
 
-var Brackets = Mutation{"Brackets", brackets}
+var Backtick = Mutation{"Backtick", backtick}
 
 func backtick(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "`")
 }
 
-var Backtick = Mutation{"Backtick", backtick}
+var Comma = Mutation{"Comma", comma}
 
 func comma(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ",")
 }
-
-var Comma = Mutation{"Comma", comma}
 
 var Arraize = Mutation{"Arraize", arraize}
 
