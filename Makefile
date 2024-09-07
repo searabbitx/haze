@@ -41,6 +41,10 @@ build/bin/haze_%: $(SRCS)
 format:
 	gofmt -s -w */*go
 
+.PHONY: vet
+vet:
+	go vet ./...
+
 .PHONY: test
 test:
 	for s in $$(go list ./...); do if ! go test -failfast -v $$s; then break; fi; done | sed ''/PASS/s//$$(printf "\033[32mPASS\033[0m")/'' | sed ''/FAIL/s//$$(printf "\033[31mFAIL\033[0m")/''
