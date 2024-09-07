@@ -108,7 +108,7 @@ func validateHost(host string) {
 		err("The target host (-t, -host) is required")
 	}
 
-	r, _ := regexp.Compile("^https?://([-a-zA-Z.]{1,256})(:[0-9]{1,5})?/?$")
+	r, _ := regexp.Compile("^https?://([-a-zA-Z0-9.]{1,256})(:[0-9]{1,5})?/?$")
 	if !r.MatchString(host) {
 		err("The target host should be in format: protocol://hostname:port")
 	}
@@ -119,7 +119,7 @@ func validateProxy(proxy string) {
 		return
 	}
 
-	r, _ := regexp.Compile("^(https?|socks[0-9]?)://([-a-zA-Z.]{1,256})(:[0-9]{1,5})?/?$")
+	r, _ := regexp.Compile("^(https?|socks[0-9]?)://([-a-zA-Z0-9.]{1,256})(:[0-9]{1,5})?/?$")
 	if !r.MatchString(proxy) {
 		err("The proxy string should be in format: protocol://hostname:port")
 	}
