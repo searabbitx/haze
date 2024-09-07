@@ -158,6 +158,10 @@ func validateRawRequest(request string) {
 		err(request + " does not look like an http request\n" +
 			"  make sure that it contains CRLFs as line separators")
 	}
+	requestLine := lns[0]
+	if len(bytes.Split(requestLine, []byte(" "))) != 3 {
+		err(request + " does not look like an http request with a valid request line")
+	}
 }
 
 func validateJson(request string) {
