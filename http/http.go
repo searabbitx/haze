@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,9 +28,15 @@ type Response struct {
 	Raw    []byte
 }
 
-func SetupProxy(proxyUrl string) {
-	purl, _ := url.Parse(proxyUrl)
-	http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(purl)}
+func SetupTransport(proxyUrl string) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	if proxyUrl != "" {
+		purl, _ := url.Parse(proxyUrl)
+		tr.Proxy = http.ProxyURL(purl)
+	}
+	http.DefaultTransport = tr
 }
 
 func Parse(bs []byte) Request {
