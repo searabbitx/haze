@@ -1,14 +1,38 @@
 package mutable
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/kamil-s-solecki/haze/http"
+	"strings"
 )
 
 var JsonParameter = Mutable{"JsonParameter", jsonParameter}
 
 func jsonParameter(rq http.Request, trans func(string) string) []http.Request {
+	identity := func(b []byte) []byte {
+		return b
+	}
+	return jsonParameterWithPostProcessing(rq, trans, identity)
+}
+
+var JsonParameterRaw = Mutable{"JsonParameterRaw", jsonParameterRaw}
+
+func jsonParameterRaw(rq http.Request, trans func(string) string) []http.Request {
+	ntrans := func(val string) string {
+		return "QREMOVE" + strings.Replace(trans(val), `"`, "__QUOT__", -1) + "QREMOVE"
+	}
+	post := func(js []byte) []byte {
+		js = bytes.Replace(js, []byte("\"QREMOVE"), []byte(""), -1)
+		js = bytes.Replace(js, []byte("QREMOVE\""), []byte(""), -1)
+		js = bytes.Replace(js, []byte("__QUOT__"), []byte(`"`), -1)
+		return js
+	}
+	return jsonParameterWithPostProcessing(rq, ntrans, post)
+}
+
+func jsonParameterWithPostProcessing(rq http.Request, trans func(string) string, post func([]byte) []byte) []http.Request {
 	if !rq.HasJsonBody() {
 		return []http.Request{}
 	}
@@ -17,7 +41,7 @@ func jsonParameter(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 
 	for _, mutJson := range mutateJson(data, trans) {
-		result = append(result, rq.WithBody(mutJson))
+		result = append(result, rq.WithBody(post(mutJson)))
 	}
 	return result
 }
