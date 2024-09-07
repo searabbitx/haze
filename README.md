@@ -13,8 +13,11 @@ make format
 ```
 
 ## Todos
+- [x] introduce configurable matchers (not only the 500s)
 - [ ] handle `multipart/form-data`
-- [ ] introduce configurable filters (not only the 500s)
+- [ ] add filters (same as matchers)
+- [ ] match/filter response strings
+- [ ] add a probe mechanism
 - [ ] specify the output dir
 - [ ] make some sane logging and general output look
 - [ ] make a custom help message to group flags 
