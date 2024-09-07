@@ -12,8 +12,10 @@ type Args struct {
 	RequestFile   string
 	MatchCodes    string
 	MatchLengths  string
+	MatchString   string
 	FilterCodes   string
 	FilterLengths string
+	FilterString  string
 	ProbeOnly     bool
 }
 
@@ -30,9 +32,11 @@ func ParseArgs() Args {
 
 	stringVar("MATCHERS", &args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar("MATCHERS", &args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
+	stringVar("MATCHERS", &args.MatchString, Param{Long: "ms", Help: "A string to match in response"})
 
 	stringVar("FILTERS", &args.FilterCodes, Param{Long: "fc", Help: "Comma-separated list of response codes to not report"})
 	stringVar("FILTERS", &args.FilterLengths, Param{Long: "fl", Help: "Comma-separated list of response lengths to not report"})
+	stringVar("FILTERS", &args.FilterString, Param{Long: "fs", Help: "A string to filter in response"})
 
 	flag.Usage = printUsage
 

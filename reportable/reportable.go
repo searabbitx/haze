@@ -1,6 +1,7 @@
 package reportable
 
 import (
+	"bytes"
 	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
 	"strconv"
@@ -27,6 +28,12 @@ func MatchLengths(lens string) Matcher {
 	}
 }
 
+func MatchString(str string) Matcher {
+	return func(res http.Response) bool {
+		return bytes.Contains(res.Raw, []byte(str))
+	}
+}
+
 func FilterCodes(codes string) Filter {
 	ranges := parseRanges(codes)
 	return func(res http.Response) bool {
@@ -38,6 +45,12 @@ func FilterLengths(lens string) Filter {
 	ranges := parseRanges(lens)
 	return func(res http.Response) bool {
 		return !isValueInRanges(ranges, int(res.Length))
+	}
+}
+
+func FilterString(str string) Filter {
+	return func(res http.Response) bool {
+		return bytes.Contains(res.Raw, []byte(str))
 	}
 }
 
@@ -77,6 +90,9 @@ func FromArgs(args cliargs.Args) ([]Matcher, []Filter) {
 	if args.MatchLengths != "" {
 		matchers = append(matchers, MatchLengths(args.MatchLengths))
 	}
+	if args.MatchString != "" {
+		matchers = append(matchers, MatchString(args.MatchString))
+	}
 
 	filters := []Filter{}
 	if args.FilterCodes != "" {
@@ -84,6 +100,9 @@ func FromArgs(args cliargs.Args) ([]Matcher, []Filter) {
 	}
 	if args.FilterLengths != "" {
 		filters = append(filters, FilterLengths(args.FilterLengths))
+	}
+	if args.FilterString != "" {
+		filters = append(filters, FilterString(args.FilterString))
 	}
 	return matchers, filters
 }
