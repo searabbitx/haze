@@ -3,6 +3,7 @@ package mutation
 import (
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/mutable"
+	"strings"
 )
 
 type Mutation struct {
@@ -70,6 +71,27 @@ func arraize(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "[]")
 }
 
+var TwentyTimes = Mutation{"TwentyTimes", twentyTimes}
+
+func twentyTimes(rq http.Request, mutable mutable.Mutable) []http.Request {
+	trans := func(val string) string {
+		return strings.Repeat(val, 20)
+	}
+	return mutable.Apply(rq, trans)
+}
+
+var Nullbyte = Mutation{"Nullbyte", nullbyte}
+
+func nullbyte(rq http.Request, mutable mutable.Mutable) []http.Request {
+	return prefixMutation(rq, mutable, "\x00")
+}
+
+var DotDotSlash = Mutation{"DotDotSlash", dotDotSlash}
+
+func dotDotSlash(rq http.Request, mutable mutable.Mutable) []http.Request {
+	return suffixMutation(rq, mutable, "/../../idontexist.txt")
+}
+
 func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
@@ -93,6 +115,13 @@ func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 		default:
 			return false
 		}
+	case Nullbyte.name:
+		switch mtbl.Name {
+		case mutable.Header.Name:
+			return false
+		default:
+			return true
+		}
 	default:
 		return true
 	}
@@ -114,5 +143,5 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) [
 
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
-		TimesSeven, Brackets, Backtick, Comma, Arraize}
+		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte}
 }

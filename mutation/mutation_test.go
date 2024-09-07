@@ -367,3 +367,36 @@ func TestDoNothingForNonMultipartBody(t *testing.T) {
 
 	testutils.AssertLen(t, got, 0)
 }
+
+func TestMultiplyValue(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=b HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{TwentyTimes}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=bbbbbbbbbbbbbbbbbbbb")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bbbbbbbbbbbbbbbbbbbb")
+}
+
+func TestNullbyte(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{Nullbyte}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=%00bar")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=%00bar")
+}
+
+func TestNotApplyNullbyteToHeaders(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\nUser-Agent:foo\r\n\r\n"))
+	got := Mutate(rq, []Mutation{Nullbyte}, []mutable.Mutable{mutable.Header})
+
+	testutils.AssertLen(t, got, 0)
+}
+
+func TestDotDotSlash(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{DotDotSlash}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=bar/../../idontexist.txt")
+}

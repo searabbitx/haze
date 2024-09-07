@@ -14,6 +14,7 @@ func urlEncodeSpecials(val string) string {
 	val = strings.Replace(val, "%", "%25", -1)
 	val = strings.Replace(val, "\\", "%5c", -1)
 	val = strings.Replace(val, "\"", "%22", -1)
+	val = strings.Replace(val, "\x00", "%00", -1)
 	return val
 }
 
