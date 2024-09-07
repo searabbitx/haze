@@ -33,7 +33,11 @@ func printUsage() {
 	fmt.Println("USAGE:")
 	fmt.Println("  haze [OPTION]... [REQUEST_FILE]...")
 	fmt.Println("\nARGS:")
-	printArg("REQUEST_FILE", "File(s) containing the raw http request(s)")
+	printArg("REQUEST_FILE", []string{
+		"File(s) containing the raw http request(s)",
+		"in case of .har files pass the -har flag",
+		"only the har entries which match the target (-t) value will be fuzzed",
+	})
 	for _, g := range groups {
 		fmt.Printf("\n%v:\n", g.name)
 		for _, f := range g.flagNames {
@@ -56,9 +60,12 @@ func printFlag(fn flagName, usage, defValue string) {
 	fmt.Println(ln)
 }
 
-func printArg(name, usage string) {
+func printArg(name string, usage []string) {
 	ln := "  " + name
 	ln += strings.Repeat(" ", keyLen-len(ln))
-	ln += usage
+	ln += usage[0]
+	for i := 1; i < len(usage); i++ {
+		ln += "\n" + strings.Repeat(" ", keyLen) + usage[i]
+	}
 	fmt.Println(ln)
 }
