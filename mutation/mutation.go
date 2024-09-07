@@ -2,45 +2,68 @@ package mutation
 
 import "github.com/kamil-s-solecki/haze/http"
 
-type Mutation func(http.Request, Mutable) []http.Request
+type Mutation struct {
+	name  string
+	apply func(http.Request, Mutable) []http.Request
+}
 
-func SingleQuotes(rq http.Request, mutable Mutable) []http.Request {
+func singleQuotes(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "'")
 }
 
-func DoubleQuotes(rq http.Request, mutable Mutable) []http.Request {
+var SingleQuotes = Mutation{"SingleQuotes", singleQuotes}
+
+func doubleQuotes(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "\"")
 }
 
-func SstiFuzz(rq http.Request, mutable Mutable) []http.Request {
+var DoubleQuotes = Mutation{"DoubleQuotes", doubleQuotes}
+
+func sstiFuzz(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "${{<%[%'\"}}%\\.")
 }
 
-func Negative(rq http.Request, mutable Mutable) []http.Request {
+var SstiFuzz = Mutation{"SstiFuzz", sstiFuzz}
+
+func negative(rq http.Request, mutable Mutable) []http.Request {
 	return prefixMutation(rq, mutable, "-")
 }
 
-func MinusOne(rq http.Request, mutable Mutable) []http.Request {
+var Negative = Mutation{"Negative", negative}
+
+func minusOne(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "-1")
 }
 
-func TimesSeven(rq http.Request, mutable Mutable) []http.Request {
+var MinusOne = Mutation{"MinusOne", minusOne}
+
+func timesSeven(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "*7")
 }
 
-func Brackets(rq http.Request, mutable Mutable) []http.Request {
+var TimesSeven = Mutation{"TimesSeven", timesSeven}
+
+func brackets(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ")]}>")
 }
 
-func Backtick(rq http.Request, mutable Mutable) []http.Request {
+var Brackets = Mutation{"Brackets", brackets}
+
+func backtick(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "`")
 }
 
-func Comma(rq http.Request, mutable Mutable) []http.Request {
+var Backtick = Mutation{"Backtick", backtick}
+
+func comma(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ",")
 }
 
-func Arraize(rq http.Request, mutable Mutable) []http.Request {
+var Comma = Mutation{"Comma", comma}
+
+var Arraize = Mutation{"Arraize", arraize}
+
+func arraize(rq http.Request, mutable Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "[]")
 }
 
@@ -58,6 +81,15 @@ func prefixMutation(rq http.Request, mutable Mutable, prefix string) []http.Requ
 	return mutable(rq, trans)
 }
 
+func cannotApply(mutation Mutation, mutable Mutable) bool {
+	/*
+		if &mutation == &Arraize && &mutable != &ParameterName {
+			return true
+		}
+	*/
+	return false
+}
+
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
 		TimesSeven, Brackets, Backtick, Comma}
@@ -67,7 +99,10 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []Mutable) []http.Re
 	result := []http.Request{}
 	for _, mutation := range mutations {
 		for _, mutable := range mutables {
-			mrq := mutation(rq, mutable)
+			if cannotApply(mutation, mutable) {
+				continue
+			}
+			mrq := mutation.apply(rq, mutable)
 			result = append(result, mrq...)
 		}
 	}
