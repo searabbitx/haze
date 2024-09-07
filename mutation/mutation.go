@@ -1,25 +1,68 @@
 package mutation
 
-import "github.com/kamil-s-solecki/haze/http"
+import (
+	"errors"
+	"github.com/kamil-s-solecki/haze/http"
+)
 
-type Mutation func(http.Request) http.Request
+var mutationNotApplicable = errors.New("Mutation not applicable")
 
-func SingleQuotes(rq http.Request) http.Request {
-	return rq.WithPath(rq.Path + "'")
+type Mutable string
+
+type Mutation func(http.Request, Mutable) (http.Request, error)
+
+const (
+	Path      Mutable = "Path"
+	Parameter Mutable = "Parameter"
+)
+
+func SingleQuotes(rq http.Request, mutable Mutable) (mrq http.Request, err error) {
+	mrq = rq
+	err = nil
+	switch mutable {
+	case Parameter:
+		mrq = rq.WithQuery(rq.Query + "'")
+	case Path:
+		mrq = rq.WithPath(rq.Path + "'")
+	default:
+		err = mutationNotApplicable
+	}
+	return
 }
 
-func DoubleQuotes(rq http.Request) http.Request {
-	return rq.WithPath(rq.Path + "\"")
+// REFACTOR NOW!!
+
+func DoubleQuotes(rq http.Request, mutable Mutable) (mrq http.Request, err error) {
+	mrq = rq
+	err = nil
+	switch mutable {
+	case Parameter:
+		mrq = rq.WithQuery(rq.Query + "\"")
+	case Path:
+		mrq = rq.WithPath(rq.Path + "\"")
+	default:
+		err = mutationNotApplicable
+	}
+	return
 }
 
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes}
 }
 
-func Mutate(rq http.Request, mutations []Mutation) []http.Request {
+func AllMutatables() []Mutable {
+	return []Mutable{Path, Parameter}
+}
+
+func Mutate(rq http.Request, mutations []Mutation, mutables []Mutable) []http.Request {
 	result := []http.Request{}
-	for _, mut := range mutations {
-		result = append(result, mut(rq))
+	for _, mutation := range mutations {
+		for _, mutable := range mutables {
+			mrq, err := mutation(rq, mutable)
+			if err == nil {
+				result = append(result, mrq)
+			}
+		}
 	}
 	return result
 }

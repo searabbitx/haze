@@ -29,7 +29,7 @@ func main() {
 
 	rq.Send("http://localhost:9090")
 
-	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations()) {
+	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
 		mut.Send("http://localhost:9090")
 	}
 }

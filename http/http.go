@@ -97,6 +97,13 @@ func (r Request) WithPath(path string) Request {
 	return result
 }
 
+func (r Request) WithQuery(query string) Request {
+	result := r.Clone()
+	result.RequestUri = strings.Replace(r.RequestUri, r.Query, query, 1)
+	result.Query = query
+	return result
+}
+
 func (r Request) Clone() Request {
 	return Request{Method: r.Method, RequestUri: r.RequestUri, Path: r.Path, Query: r.Query,
 		ProtocolVersion: r.ProtocolVersion, Headers: copyHeaders(r.Headers), Body: r.Body}
