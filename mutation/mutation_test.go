@@ -255,3 +255,12 @@ func TestApplySingleQuotesMutationToAnArrayJson(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`["bar'"]`))
 }
+
+func TestApplySingleQuotesMutationToAStringJson(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n\"bar\""))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte(`"bar'"`))
+}

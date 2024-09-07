@@ -104,8 +104,10 @@ func mutateJson(data interface{}, trans func(string) string) [][]byte {
 	switch data.(type) {
 	case []any:
 		muts = mutateJsonArray(data.([]interface{}), trans)
-	default:
+	case map[string]interface{}:
 		muts = mutateJsonRecursive(data.(map[string]interface{}), trans)
+	default:
+		muts = mutateFlatJson(&data, trans)
 	}
 
 	for _, jsonMut := range muts {
@@ -115,6 +117,18 @@ func mutateJson(data interface{}, trans func(string) string) [][]byte {
 		jsonMut.Revert()
 	}
 	return result
+}
+
+func mutateFlatJson(data *interface{}, trans func(string) string) []JsonMutation {
+	orig := *data
+	return []JsonMutation{JsonMutation{
+		Apply: func() {
+			*data = trans(fmt.Sprintf("%v", orig))
+		},
+		Revert: func() {
+			*data = orig
+		},
+	}}
 }
 
 func mutateJsonRecursive(data map[string]interface{}, trans func(string) string) []JsonMutation {
