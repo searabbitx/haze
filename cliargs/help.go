@@ -57,7 +57,7 @@ func printFlag(fn flagName, usage, defValue string) {
 	}
 	ln += strings.Repeat(" ", keyLen-len(ln))
 	ln += usage
-	if defValue != "" {
+	if defValue != "" && defValue != "[  ]" {
 		ln += ". (Default: " + defValue + ")"
 	}
 	fmt.Println(ln)
