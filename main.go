@@ -58,7 +58,7 @@ func parseRequestsFromFile(rfile string, args cliargs.Args) []http.Request {
 	if !args.Har {
 		return []http.Request{http.Parse(raw)}
 	}
-	return http.ParseHar(raw)
+	return http.ParseHar(raw, args.Host)
 }
 
 func main() {

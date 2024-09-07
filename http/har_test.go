@@ -17,7 +17,7 @@ func readHar(path string) []byte {
 func TestReturnEmptyArrayForNoRequestsInHar(t *testing.T) {
 	har := readHar("../var/hars/empty.har")
 
-	got := ParseHar(har)
+	got := ParseHar(har, "http://localhost:9090")
 
 	testutils.AssertLen(t, got, 0)
 }
@@ -25,7 +25,7 @@ func TestReturnEmptyArrayForNoRequestsInHar(t *testing.T) {
 func TestParseGetRequestFromHar(t *testing.T) {
 	har := readHar("../var/hars/get.har")
 
-	got := ParseHar(har)
+	got := ParseHar(har, "http://localhost:9090")
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Method, "GET")
@@ -39,9 +39,18 @@ func TestParseGetRequestFromHar(t *testing.T) {
 func TestParsePostRequestFromHar(t *testing.T) {
 	har := readHar("../var/hars/post.har")
 
-	got := ParseHar(har)
+	got := ParseHar(har, "http://localhost:9090")
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Method, "POST")
 	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=val1&bar=val2"))
+}
+
+func TestFilterHarRequestsBasedOnHost(t *testing.T) {
+	har := readHar("../var/hars/filter.har")
+
+	got := ParseHar(har, "http://localhost:9090")
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Path, "/correct")
 }
