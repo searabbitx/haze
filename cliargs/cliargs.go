@@ -51,13 +51,15 @@ func stringVar(pvar *string, param Param) {
 func configUsage() {
 	flag.Usage = func() {
 		PrintBanner()
-		fmt.Println("\nOPTIONS:\n")
+		fmt.Println("OPTIONS:\n")
 		flag.PrintDefaults()
 	}
 }
 
 func PrintBanner() {
-	fmt.Println("... Haze ...")
+	fmt.Println("               .**.        ")
+	fmt.Println("            .. haze ..     ")
+	fmt.Println("               `**`        ")
 }
 
 func validate(args Args) {

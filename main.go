@@ -35,12 +35,14 @@ func main() {
 
 	printInfo(args, reportDir)
 
-	rq.Send(addr)
+	probe := rq.Send(addr)
+	fmt.Println("Probe:", probe, "\n")
+
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
 		res := mut.Send(addr)
 		if reportable.IsReportable(res, matchers, filters) {
 			fname := report.Report(mut.Raw(addr), res.Raw, reportDir)
-			fmt.Printf("Crash! %s (%s)\n", res, fname)
+			fmt.Printf("-={*}=- Crash! %s (%s)\n", res, fname)
 		}
 	}
 }
