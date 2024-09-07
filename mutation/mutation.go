@@ -122,6 +122,12 @@ func colon(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return mutable.Apply(rq, trans)
 }
 
+var NeNosqli = Mutation{"NeNosqli", neNosqli}
+
+func neNosqli(rq http.Request, mutable mutable.Mutable) []http.Request {
+	return suffixMutation(rq, mutable, "[$ne]")
+}
+
 func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
@@ -138,7 +144,7 @@ func prefixMutation(rq http.Request, mutable mutable.Mutable, prefix string) []h
 
 func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 	switch mutation.name {
-	case Arraize.name:
+	case Arraize.name, NeNosqli.name:
 		switch mtbl.Name {
 		case mutable.ParameterName.Name, mutable.BodyParameterName.Name:
 			return true
@@ -181,5 +187,5 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) [
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
 		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte,
-		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon}
+		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon, NeNosqli}
 }

@@ -439,3 +439,12 @@ func TestColon(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=bar:bar")
 }
+
+func TestApplyNeNosqliMutationToParameterName(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{NeNosqli}, []mutable.Mutable{mutable.ParameterName})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo[$ne]=bar")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo[$ne]=bar")
+}
