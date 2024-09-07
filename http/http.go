@@ -91,7 +91,21 @@ func (r Request) Send(host string) {
 }
 
 func (r Request) WithPath(path string) Request {
-	requestUri := strings.Replace(r.RequestUri, r.Path, path, 1)
-	return Request{RequestUri: requestUri, Method: r.Method, Path: path, Query: r.Query,
-		ProtocolVersion: r.ProtocolVersion, Headers: r.Headers, Body: r.Body}
+	result := r.Clone()
+	result.RequestUri = strings.Replace(r.RequestUri, r.Path, path, 1)
+	result.Path = path
+	return result
+}
+
+func (r Request) Clone() Request {
+	return Request{Method: r.Method, RequestUri: r.RequestUri, Path: r.Path, Query: r.Query,
+		ProtocolVersion: r.ProtocolVersion, Headers: copyHeaders(r.Headers), Body: r.Body}
+}
+
+func copyHeaders(hs map[string]string) map[string]string {
+	res := make(map[string]string)
+	for k, v := range hs {
+		res[k] = v
+	}
+	return res
 }

@@ -118,3 +118,41 @@ func TestQuery(t *testing.T) {
 		testutils.AssertEquals(t, got, want)
 	}
 }
+
+func TestClone(t *testing.T) {
+	want := Request{
+		Method:          "Foo1",
+		RequestUri:      "Foo2",
+		Path:            "Foo2",
+		Query:           "Foo3",
+		ProtocolVersion: "Foo4",
+		Headers:         map[string]string{"Bar": "Baz"},
+		Body:            []byte("Foo5"),
+	}
+
+	got := want.Clone()
+
+	testutils.AssertEquals(t, want.Method, got.Method)
+	testutils.AssertEquals(t, want.RequestUri, got.RequestUri)
+	testutils.AssertEquals(t, want.Path, got.Path)
+	testutils.AssertEquals(t, want.Query, got.Query)
+	testutils.AssertEquals(t, want.ProtocolVersion, got.ProtocolVersion)
+	testutils.AssertMapEquals(t, want.Headers, got.Headers)
+	testutils.AssertByteEquals(t, want.Body, got.Body)
+}
+
+func TestCloneHeaders(t *testing.T) {
+	orig := Request{
+		Method:          "Foo1",
+		RequestUri:      "Foo2",
+		Path:            "Foo2",
+		Query:           "Foo3",
+		ProtocolVersion: "Foo4",
+		Headers:         map[string]string{"Bar": "Baz"},
+		Body:            []byte("Foo5"),
+	}
+	clone := orig.Clone()
+	clone.Headers["Bar"] = "Edit"
+
+	testutils.AssertEquals(t, orig.Headers["Bar"], "Baz")
+}
