@@ -25,3 +25,4 @@ make format
 - [ ] parse HARs
 - [ ] handle `multipart/form-data`
 - [ ] add a parameter to array mutation ( foo=bar -> foo[]=bar )
+- [ ] split mutation and mutable into multiple files
