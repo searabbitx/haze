@@ -43,8 +43,8 @@ func ParseArgs() Args {
 	intVar("GENERAL", &args.Threads, Param{Long: "threads", Short: "th", Default: 10, Help: "Number of threads to use for fuzzing"})
 	stringVar("GENERAL", &args.Proxy, Param{Long: "proxy", Short: "x", Help: "Proxy address"})
 	boolVar("GENERAL", &args.Har, Param{Long: "har", Help: "Indicate that the request files are in the har format"})
-	stringVar("GENERAL", &args.Cookies, Param{Long: "cookies", Short: "c", Help: "Cookies string. This will replace `Cookie:` header read from request files"})
-	stringArrayVar("GENERAL", &args.Headers, Param{Long: "header", Short: "H", Help: "Header string. It overwrites headers that are already present in request files."})
+	stringVar("GENERAL", &args.Cookies, Param{Long: "cookies", Short: "c", Help: "Cookies string. This will replace `Cookie:` header read from request files."})
+	stringArrayVar("GENERAL", &args.Headers, Param{Long: "header", Short: "H", Help: "Header string. It overwrites headers that are already present in request files.\nYou can provide multiple values: `-H 'Foo: foo' -H 'Bar: bar'."})
 
 	stringVar("MATCHERS", &args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar("MATCHERS", &args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
