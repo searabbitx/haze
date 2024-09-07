@@ -23,6 +23,7 @@ GENERAL:
   -probe, -p      Send the probe request only. (Default: false)
   -output, -o     Directory where the report will be created. (Default: cwd)
   -threads, -th   Number of threads to use for fuzzing. (Default: 10)
+  -proxy, -x      Proxy address
 
 MATCHERS:
   -mc             Comma-separated list of response codes to report. (Default: 500-599)
