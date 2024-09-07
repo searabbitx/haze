@@ -44,7 +44,7 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 			}
 			if reportable.IsReportable(res, matchers, filters) {
 				fname := report.Report(mut.Raw(args.Host), res.Raw, reportDir)
-				bar.Log(fmt.Sprintf("     !Crash:       %s (%s)\n", res, fname))
+				bar.Log(fmt.Sprintf("    ! Crash:       %s (%s)\n", res, fname))
 			}
 			bar.Next()
 		}
@@ -67,12 +67,11 @@ func main() {
 	for _, rfile := range args.RequestFiles {
 		fmt.Printf("... ( %v ) ...\n", rfile)
 		rq := http.Parse(readRawRequest(rfile))
-		if args.ProbeOnly {
-			probe(rq, args.Host)
-			fmt.Println()
-			continue
-		}
 		probe(rq, args.Host)
-		fuzz(args, rq, reportDir)
+		if args.ProbeOnly {
+			fmt.Println()
+		} else {
+			fuzz(args, rq, reportDir)
+		}
 	}
 }
