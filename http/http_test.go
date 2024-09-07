@@ -84,3 +84,37 @@ func TestBody(t *testing.T) {
 
 	testutils.AssertByteEquals(t, got, want)
 }
+
+func TestPath(t *testing.T) {
+	cases := []struct {
+		req  []byte
+		path string
+	}{
+		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/somepath"},
+		{[]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/somepath"},
+	}
+
+	for _, c := range cases {
+		got := Parse(c.req).Path
+		want := c.path
+
+		testutils.AssertEquals(t, got, want)
+	}
+}
+
+func TestQuery(t *testing.T) {
+	cases := []struct {
+		req   []byte
+		query string
+	}{
+		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), ""},
+		{[]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "foo=bar"},
+	}
+
+	for _, c := range cases {
+		got := Parse(c.req).Query
+		want := c.query
+
+		testutils.AssertEquals(t, got, want)
+	}
+}
