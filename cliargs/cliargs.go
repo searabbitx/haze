@@ -1,6 +1,7 @@
 package cliargs
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -96,6 +97,9 @@ func validate(args Args) {
 	validateHost(args.Host)
 	validateProxy(args.Proxy)
 	validateRequests(args.RequestFiles)
+	if args.Har {
+		validateJsons(args.RequestFiles)
+	}
 	validateRange(args.MatchCodes)
 	validateRange(args.MatchLengths)
 	validateOutput(args.OutputDir)
@@ -143,6 +147,15 @@ func validateRequest(request string) {
 	}
 }
 
+func validateJsons(rqs []string) {
+	for _, path := range rqs {
+		content, _ := os.ReadFile(path)
+		if !json.Valid(content) {
+			err(path + " is not a valid json")
+		}
+	}
+}
+
 func validateRange(val string) {
 	if val == "" {
 		return
@@ -169,7 +182,7 @@ func validateOutput(output string) {
 }
 
 func err(msg string) {
-	fmt.Println(msg + "\n")
+	fmt.Println(msg)
 	flag.Usage()
 	os.Exit(1)
 }
