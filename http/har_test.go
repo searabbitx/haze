@@ -21,3 +21,11 @@ func TestReturnEmptyArrayForNoRequestsInHar(t *testing.T) {
 
 	testutils.AssertLen(t, got, 0)
 }
+
+func TestParseGetRequestFromHar(t *testing.T) {
+	har := readHar("../var/hars/get.har")
+
+	got := ParseHar(har)
+
+	testutils.AssertLen(t, got, 1)
+}
