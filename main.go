@@ -25,7 +25,7 @@ func main() {
 	reportDir := report.MakeReportDir()
 	fmt.Println("Report dir:", reportDir)
 
-	matchers := []reportable.Matcher{reportable.MatchCodes("500-510")}
+	matchers := reportable.FromArgs(args)
 
 	rq.Send(addr)
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
