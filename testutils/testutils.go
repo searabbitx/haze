@@ -23,3 +23,15 @@ func AssertByteEquals(t *testing.T, got []byte, want []byte) {
 		t.Errorf("got %v, wanted %v", got, want)
 	}
 }
+
+func AssertEmpty[T any](t *testing.T, slice []T) {
+	if len(slice) != 0 {
+		t.Errorf("got non empty slice")
+	}
+}
+
+func AssertLen[T any](t *testing.T, slice []T, length int) {
+	if len(slice) != length {
+		t.Errorf("got a slice of len %v, wanted %v", len(slice), length)
+	}
+}
