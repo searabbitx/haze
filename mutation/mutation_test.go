@@ -416,3 +416,10 @@ func TestWhitespaces(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=%20%09%0c%0d%0abar")
 }
+
+func TestNotApplyWhitespacesToHeaders(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\nUser-Agent:foo\r\n\r\n"))
+	got := Mutate(rq, []Mutation{Whitespaces}, []mutable.Mutable{mutable.Header})
+
+	testutils.AssertLen(t, got, 0)
+}

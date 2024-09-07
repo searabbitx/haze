@@ -134,6 +134,13 @@ func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 		default:
 			return true
 		}
+	case Whitespaces.name:
+		switch mtbl.Name {
+		case mutable.Header.Name:
+			return false
+		default:
+			return true
+		}
 	default:
 		return true
 	}
