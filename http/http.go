@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -190,4 +191,8 @@ func (r Request) HasJsonBody() bool {
 func (r Request) HasFormUrlEncodedBody() bool {
 	ct, ok := r.Headers["Content-Type"]
 	return ok && ct == "application/x-www-form-urlencoded"
+}
+
+func (res Response) String() string {
+	return fmt.Sprintf("[Code: %v, Len: %v]", res.Code, res.Length)
 }
