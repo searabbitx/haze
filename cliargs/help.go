@@ -32,6 +32,8 @@ func printUsage() {
 	PrintBanner()
 	fmt.Println("USAGE:")
 	fmt.Println("  haze [OPTION]... [REQUEST_FILE]...")
+	fmt.Println("\nARGS:")
+	printArg("REQUEST_FILE", "File(s) containing the raw http request(s)")
 	for _, g := range groups {
 		fmt.Printf("\n%v:\n", g.name)
 		for _, f := range g.flagNames {
@@ -51,5 +53,12 @@ func printFlag(fn flagName, usage, defValue string) {
 	if defValue != "" {
 		ln += ". (Default: " + defValue + ")"
 	}
+	fmt.Println(ln)
+}
+
+func printArg(name, usage string) {
+	ln := "  " + name
+	ln += strings.Repeat(" ", keyLen-len(ln))
+	ln += usage
 	fmt.Println(ln)
 }
