@@ -25,13 +25,6 @@ func (b *Bar) Next() {
 	b.update()
 }
 
-func (b Bar) Log(msg string) {
-	defer b.mu.Unlock()
-	b.mu.Lock()
-	fmt.Fprint(b.buff, msg, "\n")
-	b.buff.Flush()
-}
-
 func (b Bar) update() {
 	defer b.buff.Flush()
 	fmt.Fprint(b.buff, "\033[30D\033[0K", b, "\033[30D")
