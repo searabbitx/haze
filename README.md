@@ -19,5 +19,5 @@ make format
 - [ ] match/filter response strings
 - [x] add a probe mechanism
 - [ ] specify the output dir
-- [ ] make some sane logging and general output look
+- [x] make some sane logging and general output look
 - [ ] make a custom help message to group flags 
