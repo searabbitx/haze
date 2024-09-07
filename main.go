@@ -38,7 +38,7 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 		}
 		if reportable.IsReportable(res, matchers, filters) {
 			fname := report.Report(mut.Raw(args.Host), res.Raw, reportDir)
-			fmt.Printf("-={*}=- Crash!     %s (%s)\n", res, fname)
+			bar.Log(fmt.Sprintf("-={*}=- Crash!     %s (%s)\n", res, fname))
 		}
 		bar.Next()
 	}
