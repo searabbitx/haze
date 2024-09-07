@@ -8,10 +8,12 @@ import (
 )
 
 type Args struct {
-	Host         string
-	RequestFile  string
-	MatchCodes   string
-	MatchLengths string
+	Host          string
+	RequestFile   string
+	MatchCodes    string
+	MatchLengths  string
+	FilterCodes   string
+	FilterLengths string
 }
 
 type Param struct {
@@ -22,8 +24,12 @@ func ParseArgs() Args {
 	args := Args{}
 	stringVar(&args.Host, Param{Long: "host", Short: "t", Help: "Target host (protocol://hostname:port)"})
 	stringVar(&args.RequestFile, Param{Long: "request", Short: "r", Help: "File containing the raw http request"})
+
 	stringVar(&args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar(&args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
+
+	stringVar(&args.FilterCodes, Param{Long: "fc", Help: "Comma-separated list of response codes to not report"})
+	stringVar(&args.FilterLengths, Param{Long: "fl", Help: "Comma-separated list of response lengths to not report"})
 
 	configUsage()
 

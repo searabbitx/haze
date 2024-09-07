@@ -51,25 +51,6 @@ func TestShouldReportLengths(t *testing.T) {
 	}
 }
 
-func TestShouldConstructFromArgsWithCodesOnly(t *testing.T) {
-	args := cliargs.Args{MatchCodes: "500,501-502"}
-
-	got := FromArgs(args)
-
-	testutils.AssertLen(t, got, 1)
-	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, got, []Filter{}))
-}
-
-func TestShouldConstructFromArgsWithCodesAndLens(t *testing.T) {
-	args := cliargs.Args{MatchCodes: "500,501-502", MatchLengths: "100-200"}
-
-	got := FromArgs(args)
-
-	testutils.AssertLen(t, got, 2)
-	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, got, []Filter{}))
-	testutils.AssertTrue(t, IsReportable(http.Response{Code: 200, Length: 150}, got, []Filter{}))
-}
-
 func TestShouldReport500When200IsFiltered(t *testing.T) {
 	res := http.Response{Code: 500}
 
@@ -108,4 +89,37 @@ func TestShouldNotReportWhenOneFilterFiltered(t *testing.T) {
 	got := IsReportable(res, []Matcher{MatchCodes("500-599")}, []Filter{FilterLengths("1500"), FilterCodes("500")})
 
 	testutils.AssertFalse(t, got)
+}
+
+func TestShouldConstructFromArgsWithCodesOnly(t *testing.T) {
+	args := cliargs.Args{MatchCodes: "500,501-502"}
+
+	ms, fs := FromArgs(args)
+
+	testutils.AssertLen(t, ms, 1)
+	testutils.AssertLen(t, fs, 0)
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, ms, fs))
+}
+
+func TestShouldConstructFromArgsWithCodesAndLens(t *testing.T) {
+	args := cliargs.Args{MatchCodes: "500,501-502", MatchLengths: "100-200"}
+
+	ms, fs := FromArgs(args)
+
+	testutils.AssertLen(t, ms, 2)
+	testutils.AssertLen(t, fs, 0)
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, ms, fs))
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 200, Length: 150}, ms, fs))
+}
+
+func TestShouldConstructFromArgsWithFilters(t *testing.T) {
+	args := cliargs.Args{MatchCodes: "500", FilterCodes: "510", FilterLengths: "100-200"}
+
+	ms, fs := FromArgs(args)
+
+	testutils.AssertLen(t, ms, 1)
+	testutils.AssertLen(t, fs, 2)
+	testutils.AssertTrue(t, IsReportable(http.Response{Code: 500}, ms, fs))
+	testutils.AssertFalse(t, IsReportable(http.Response{Code: 510}, ms, fs))
+	testutils.AssertFalse(t, IsReportable(http.Response{Code: 500, Length: 150}, ms, fs))
 }
