@@ -2,6 +2,7 @@ package mutable
 
 import (
 	"github.com/kamil-s-solecki/haze/http"
+	"github.com/kamil-s-solecki/haze/utils"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ func parameter(rq http.Request, trans func(string) string) []http.Request {
 		return result
 	}
 	do := func(key, val string) (string, string) {
-		return key, urlEncodeSpecials(trans(val))
+		return key, utils.UrlEncodeSpecials(trans(val))
 	}
 	for _, q := range applyToEachParam(rq.Query, do) {
 		result = append(result, rq.WithQuery(q))
@@ -29,7 +30,7 @@ func parameterName(rq http.Request, trans func(string) string) []http.Request {
 		return result
 	}
 	do := func(key, val string) (string, string) {
-		return urlEncodeSpecials(trans(key)), val
+		return utils.UrlEncodeSpecials(trans(key)), val
 	}
 	for _, q := range applyToEachParam(rq.Query, do) {
 		result = append(result, rq.WithQuery(q))
@@ -45,7 +46,7 @@ func bodyParameter(rq http.Request, trans func(string) string) []http.Request {
 		return result
 	}
 	do := func(key, val string) (string, string) {
-		return key, urlEncodeSpecials(trans(val))
+		return key, utils.UrlEncodeSpecials(trans(val))
 	}
 	for _, q := range applyToEachParam(string(rq.Body), do) {
 		result = append(result, rq.WithBody([]byte(q)))
@@ -61,7 +62,7 @@ func bodyParameterName(rq http.Request, trans func(string) string) []http.Reques
 		return result
 	}
 	do := func(key, val string) (string, string) {
-		return urlEncodeSpecials(trans(key)), val
+		return utils.UrlEncodeSpecials(trans(key)), val
 	}
 	for _, q := range applyToEachParam(string(rq.Body), do) {
 		result = append(result, rq.WithBody([]byte(q)))
