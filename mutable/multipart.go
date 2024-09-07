@@ -10,25 +10,45 @@ var MultipartFormParameter = Mutable{"MultipartFormParameter", multipartFormPara
 
 func multipartFormParameter(rq http.Request, trans func(string) string) []http.Request {
 	boundary := extractBoundary(rq)
-	return []http.Request{rq.WithBody(mutateNextValue(rq.Body, boundary, trans))}
+	result := []http.Request{}
+	body := rq.Body
+
+	var mut []byte
+	for i := 0; i != -1; {
+		mut, i = mutateNextValue(body, boundary, i, trans)
+		if i == -1 {
+			break
+		}
+		result = append(result, rq.WithBody(mut))
+	}
+	return result
 }
 
-func mutateNextValue(body, boundary []byte, trans func(string) string) []byte {
-	start, end := findValueRange(body, boundary)
+func mutateNextValue(body, boundary []byte, from int, trans func(string) string) ([]byte, int) {
+	start, end := findValueRange(body, boundary, from)
+	if start == -1 || end == -1 {
+		return []byte{}, -1
+	}
 	val := copySlice(body, start, end)
 	val = []byte(trans(string(val)))
 
 	result := copySlice(body, 0, start)
 	result = append(result, val...)
 	result = append(result, copySlice(body, end, len(body))...)
-	return result
+
+	stoppedAt := end + len(boundary)
+	return result, stoppedAt
 }
 
-func findValueRange(body, boundary []byte) (int, int) {
+func findValueRange(body, boundary []byte, from int) (int, int) {
+	body = body[from:]
 	twoRns := []byte("\r\n\r\n")
 	start := bytes.Index(body, twoRns) + len(twoRns)
-	end := bytes.Index(body[start:], boundary) + start
-	return start, end
+	end := bytes.Index(body[start:], boundary)
+	if end == -1 || start == -1 {
+		return -1, -1
+	}
+	return start + from, end + start + from
 }
 
 func extractBoundary(rq http.Request) []byte {

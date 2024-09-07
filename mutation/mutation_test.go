@@ -347,3 +347,15 @@ func TestApplySingleQuotesMutationToMultipartFormParameter(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar'\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n"))
 }
+
+func TestApplySingleQuotesMutationToAllMultipartFormParameters(t *testing.T) {
+	head := []byte("POST /multi HTTP/1.1\r\nContent-Type: multipart/form-data; boundary=----WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Length: 144\r\n\r\n")
+	body := []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"baz\"\r\n\r\nquix\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n")
+	rq := http.Parse(append(head, body...))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []mutable.Mutable{mutable.MultipartFormParameter})
+
+	testutils.AssertLen(t, got, 2)
+	testutils.AssertByteEquals(t, got[0].Body, []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar'\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"baz\"\r\n\r\nquix\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n"))
+	testutils.AssertByteEquals(t, got[1].Body, []byte("------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f\r\nContent-Disposition: form-data; name=\"baz\"\r\n\r\nquix'\r\n------WebKitFormBoundaryQdBweljBPtRAAu9f--\r\n"))
+}
