@@ -1,0 +1,5 @@
+GET /test HTTP/1.1
+Host: httpbin.org
+Cookie: foo={%22foo%22:%22bar%22}
+Connection: close
+
