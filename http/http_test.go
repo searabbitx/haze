@@ -28,7 +28,7 @@ func TestRequestUri(t *testing.T) {
 		requestUri string
 	}{
 		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/somepath"},
-		{[]byte("GET /otherpath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/otherpath"},
+		{[]byte("GET /otherpath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/otherpath?foo=bar"},
 	}
 
 	for _, c := range cases {
