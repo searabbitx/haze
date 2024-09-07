@@ -16,6 +16,10 @@ type Request struct {
 	Body            []byte
 }
 
+type Response struct {
+	Code int
+}
+
 func Parse(bs []byte) Request {
 	requestLine := bytes.Split(bs, []byte("\r\n"))[0]
 	method, requestUri, protocolVersion := parseRequestLine(requestLine)
@@ -72,7 +76,7 @@ func extractBody(rawReq []byte) []byte {
 	return rawReq[bodyIndex:]
 }
 
-func (r Request) Send(host string) {
+func (r Request) Send(host string) Response {
 	url := host + r.RequestUri
 	req, err := http.NewRequest(r.Method, url, nil)
 	if err != nil {
@@ -84,10 +88,11 @@ func (r Request) Send(host string) {
 	}
 
 	client := &http.Client{}
-	_, err = client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
+	return Response{res.StatusCode}
 }
 
 func (r Request) WithPath(path string) Request {
@@ -101,6 +106,12 @@ func (r Request) WithQuery(query string) Request {
 	result := r.Clone()
 	result.RequestUri = strings.Replace(r.RequestUri, r.Query, query, 1)
 	result.Query = query
+	return result
+}
+
+func (r Request) WithBody(body []byte) Request {
+	result := r.Clone()
+	result.Body = body
 	return result
 }
 
