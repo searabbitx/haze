@@ -3,7 +3,7 @@ SRCS := $(shell find . -name '*.go')
 build: haze
 
 haze: $(SRCS)
-	go build .
+	go build -trimpath -ldflags "-s -w" .
 
 .PHONY: format
 format:
