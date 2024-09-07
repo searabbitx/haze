@@ -92,6 +92,18 @@ func dotDotSlash(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "/../../idontexist.txt")
 }
 
+var XmlEscape = Mutation{"XmlEscape", xmlEscape}
+
+func xmlEscape(rq http.Request, mutable mutable.Mutable) []http.Request {
+	return suffixMutation(rq, mutable, `"><foons:Foo "`)
+}
+
+var Whitespaces = Mutation{"Whitespaces", whitespaces}
+
+func whitespaces(rq http.Request, mutable mutable.Mutable) []http.Request {
+	return prefixMutation(rq, mutable, " \t\f\r\n")
+}
+
 func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
@@ -143,5 +155,5 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) [
 
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
-		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte}
+		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte, DotDotSlash, XmlEscape, Whitespaces}
 }

@@ -400,3 +400,19 @@ func TestDotDotSlash(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Query, "foo=bar/../../idontexist.txt")
 }
+
+func TestXmlEscape(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{XmlEscape}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=bar%22><foons:Foo%20%22")
+}
+
+func TestWhitespaces(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+	got := Mutate(rq, []Mutation{Whitespaces}, []mutable.Mutable{mutable.Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=%20%09%0c%0d%0abar")
+}
