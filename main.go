@@ -51,6 +51,7 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 		pool.RunTask(task)
 	}
 	pool.Wait()
+	bar.End()
 }
 
 func parseRequestsFromFile(rfile string, args cliargs.Args) []http.Request {

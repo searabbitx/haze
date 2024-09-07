@@ -56,5 +56,4 @@ func printTable(es []entry) {
 		fmt.Println(ln)
 	}
 	fmt.Println(bar)
-	fmt.Println("")
 }
