@@ -27,6 +27,10 @@ func PrintInfo(args Args, reportDir string) {
 		entries = append(entries, entry{"Threads", strconv.Itoa(args.Threads)})
 	}
 
+	if args.Proxy != "" {
+		entries = append(entries, entry{"Proxy", args.Proxy})
+	}
+
 	printTable(entries)
 }
 

@@ -61,6 +61,9 @@ func main() {
 	if !args.ProbeOnly {
 		reportDir = report.MakeReportDir(args.OutputDir)
 	}
+	if args.Proxy != "" {
+		http.SetupProxy(args.Proxy)
+	}
 	cliargs.PrintInfo(args, reportDir)
 	
 	for _, rfile := range args.RequestFiles {

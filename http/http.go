@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strings"
 )
 
@@ -24,6 +25,11 @@ type Response struct {
 	Code   int
 	Length int64
 	Raw    []byte
+}
+
+func SetupProxy(proxyUrl string) {
+	purl, _ := url.Parse(proxyUrl)
+	http.DefaultTransport = &http.Transport{Proxy: http.ProxyURL(purl)}
 }
 
 func Parse(bs []byte) Request {

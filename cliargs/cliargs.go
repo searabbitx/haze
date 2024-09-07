@@ -11,6 +11,7 @@ type Args struct {
 	Host          string
 	RequestFiles  []string
 	OutputDir     string
+	Proxy         string
 	Threads       int
 	MatchCodes    string
 	MatchLengths  string
@@ -32,6 +33,7 @@ func ParseArgs() Args {
 	boolVar("GENERAL", &args.ProbeOnly, Param{Long: "probe", Short: "p", Help: "Send the probe request only"})
 	stringVar("GENERAL", &args.OutputDir, Param{Long: "output", Short: "o", Help: "Directory where the report will be created. (Default: cwd)"})
 	intVar("GENERAL", &args.Threads, Param{Long: "threads", Short: "th", Default: 10, Help: "Number of threads to use for fuzzing"})
+	stringVar("GENERAL", &args.Proxy, Param{Long: "proxy", Short: "x", Help: "Proxy address"})
 
 	stringVar("MATCHERS", &args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar("MATCHERS", &args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
@@ -90,6 +92,7 @@ func boolVar(group string, pvar *bool, param Param) {
 
 func validate(args Args) {
 	validateHost(args.Host)
+	validateProxy(args.Proxy)
 	validateRequests(args.RequestFiles)
 	validateRange(args.MatchCodes)
 	validateRange(args.MatchLengths)
@@ -104,6 +107,17 @@ func validateHost(host string) {
 	r, _ := regexp.Compile("^https?://([-a-zA-Z.]{1,256})(:[0-9]{1,5})?/?$")
 	if !r.MatchString(host) {
 		err("The target host should be in format: protocol://hostname:port")
+	}
+}
+
+func validateProxy(proxy string) {
+	if proxy == "" {
+		return
+	}
+
+	r, _ := regexp.Compile("^(https?|socks[0-9]?)://([-a-zA-Z.]{1,256})(:[0-9]{1,5})?/?$")
+	if !r.MatchString(proxy) {
+		err("The proxy string should be in format: protocol://hostname:port")
 	}
 }
 
