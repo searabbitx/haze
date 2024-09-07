@@ -3,5 +3,11 @@
 ## Run all tests
 
 ```bash
-go test ./... -v
+make test
+```
+
+## Format code
+
+```bash
+make format
 ```
