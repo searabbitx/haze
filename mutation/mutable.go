@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-type Mutable func(http.Request, func(string) string) []http.Request
+type Mutable struct {
+	name  string
+	apply func(http.Request, func(string) string) []http.Request
+}
 
 func urlEncodeSpecials(val string) string {
 	val = strings.Replace(val, "%", "%25", -1)
@@ -16,13 +19,17 @@ func urlEncodeSpecials(val string) string {
 	return val
 }
 
-func Path(rq http.Request, trans func(string) string) []http.Request {
+var Path = Mutable{"Path", path}
+
+func path(rq http.Request, trans func(string) string) []http.Request {
 	noLeadingSlash := rq.Path[1:]
 	val := urlEncodeSpecials(trans(noLeadingSlash))
 	return []http.Request{rq.WithPath("/" + val)}
 }
 
-func Parameter(rq http.Request, trans func(string) string) []http.Request {
+var Parameter = Mutable{"Parameter", parameter}
+
+func parameter(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	if rq.Query == "" {
 		return result
@@ -36,7 +43,9 @@ func Parameter(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
-func ParameterName(rq http.Request, trans func(string) string) []http.Request {
+var ParameterName = Mutable{"ParameterName", parameterName}
+
+func parameterName(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	if rq.Query == "" {
 		return result
@@ -50,7 +59,9 @@ func ParameterName(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
-func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
+var BodyParameter = Mutable{"BodyParameter", bodyParameter}
+
+func bodyParameter(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	if len(rq.Body) == 0 || !rq.HasFormUrlEncodedBody() {
 		return result
@@ -76,7 +87,9 @@ func applyToEachParam(params string, do func(key, val string) (string, string)) 
 	return result
 }
 
-func Header(rq http.Request, trans func(string) string) []http.Request {
+var Header = Mutable{"Header", header}
+
+func header(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	for key, val := range rq.Headers {
 		switch key {
@@ -89,7 +102,9 @@ func Header(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
-func Cookie(rq http.Request, trans func(string) string) []http.Request {
+var Cookie = Mutable{"Cookie", cookie}
+
+func cookie(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	for key, val := range rq.Cookies {
 		enc := urlEncodeSpecials(trans(val))
@@ -98,7 +113,9 @@ func Cookie(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
-func JsonParameter(rq http.Request, trans func(string) string) []http.Request {
+var JsonParameter = Mutable{"JsonParameter", jsonParameter}
+
+func jsonParameter(rq http.Request, trans func(string) string) []http.Request {
 	if !rq.HasJsonBody() {
 		return []http.Request{}
 	}

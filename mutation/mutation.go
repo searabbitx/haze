@@ -71,22 +71,20 @@ func suffixMutation(rq http.Request, mutable Mutable, suffix string) []http.Requ
 	trans := func(val string) string {
 		return val + suffix
 	}
-	return mutable(rq, trans)
+	return mutable.apply(rq, trans)
 }
 
 func prefixMutation(rq http.Request, mutable Mutable, prefix string) []http.Request {
 	trans := func(val string) string {
 		return prefix + val
 	}
-	return mutable(rq, trans)
+	return mutable.apply(rq, trans)
 }
 
 func cannotApply(mutation Mutation, mutable Mutable) bool {
-	/*
-		if &mutation == &Arraize && &mutable != &ParameterName {
-			return true
-		}
-	*/
+	if mutation.name == Arraize.name && mutable.name != ParameterName.name {
+		return true
+	}
 	return false
 }
 
