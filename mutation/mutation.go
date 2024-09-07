@@ -104,6 +104,24 @@ func whitespaces(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return prefixMutation(rq, mutable, " \t\f\r\n")
 }
 
+var SemicolonCsv = Mutation{"SemicolonCsv", semicolonCsv}
+
+func semicolonCsv(rq http.Request, mutable mutable.Mutable) []http.Request {
+	trans := func(val string) string {
+		return val + ";" + val
+	}
+	return mutable.Apply(rq, trans)
+}
+
+var Colon = Mutation{"Colon", colon}
+
+func colon(rq http.Request, mutable mutable.Mutable) []http.Request {
+	trans := func(val string) string {
+		return val + ":" + val
+	}
+	return mutable.Apply(rq, trans)
+}
+
 func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
@@ -162,5 +180,6 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) [
 
 func AllMutations() []Mutation {
 	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
-		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte, DotDotSlash, XmlEscape, Whitespaces}
+		TimesSeven, Brackets, Backtick, Comma, Arraize, TwentyTimes, Nullbyte,
+		DotDotSlash, XmlEscape, Whitespaces, SemicolonCsv, Colon}
 }
