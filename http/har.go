@@ -40,6 +40,7 @@ func entryToRequest(entry map[string]interface{}) Request {
 		Path:       extractPath(entry),
 		Query:      extractQuery(entry),
 		Cookies:    extractCookies(entry),
+		Headers:    extractHeaders(entry),
 	}
 }
 
@@ -76,6 +77,25 @@ func extractCookies(entry map[string]interface{}) map[string]string {
 		name := cookie["name"].(string)
 		val := cookie["value"].(string)
 		result[name] = val
+	}
+
+	return result
+}
+
+func extractHeaders(entry map[string]interface{}) map[string]string {
+	result := map[string]string{}
+
+	headers := entry["headers"].([]interface{})
+	for _, header := range headers {
+		header := header.(map[string]interface{})
+		name := header["name"].(string)
+		val := header["value"].(string)
+		switch name {
+		case "Connection", "Host", "Cookie":
+			continue
+		default:
+			result[name] = val
+		}
 	}
 
 	return result
