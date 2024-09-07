@@ -6,6 +6,7 @@ import (
 	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/mutation"
+	"github.com/kamil-s-solecki/haze/progress"
 	"github.com/kamil-s-solecki/haze/report"
 	"github.com/kamil-s-solecki/haze/reportable"
 )
@@ -37,11 +38,14 @@ func main() {
 	fmt.Println("")
 
 	matchers, filters := reportable.FromArgs(args)
-	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
+	muts := mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables())
+	bar := progress.Start(len(muts))
+	for  _, mut := range muts {
 		res := mut.Send(addr)
 		if reportable.IsReportable(res, matchers, filters) {
 			fname := report.Report(mut.Raw(addr), res.Raw, reportDir)
 			fmt.Printf("-={*}=- Crash! %s (%s)\n", res, fname)
 		}
+		bar.Next()
 	}
 }
