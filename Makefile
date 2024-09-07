@@ -1,5 +1,5 @@
 SRCS := $(shell find . -name '*.go')
-GOFLAGS=-trimpath -ldflags "-s -w"
+GOFLAGS=-trimpath -ldflags "-s -w" -buildvcs=false
 
 define goos
 $(word 2,\
