@@ -18,9 +18,17 @@ func readRawRequest(rqPath string) []byte {
 func printInfo(args cliargs.Args, reportDir string) {
 	cliargs.PrintBanner()
 	fmt.Println("-------------------------------------")
-	fmt.Println("  Request file: ", args.RequestFile)
-	fmt.Println("  Report  dir:  ", reportDir)
+	fmt.Println("  Target        : ", args.Host)
+	fmt.Println("  Request file  : ", args.RequestFile)
+	if reportDir != "" {
+		fmt.Println("  Report  dir   : ", reportDir)
+	}
 	fmt.Println("-------------------------------------\n")
+}
+
+func probe(rq http.Request, addr string) {
+	probe := rq.Send(addr)
+	fmt.Println("Probe:", probe)
 }
 
 func main() {
@@ -28,16 +36,18 @@ func main() {
 
 	rq := http.Parse(readRawRequest(args.RequestFile))
 	addr := args.Host
+	if args.ProbeOnly {
+		printInfo(args, "")
+		probe(rq, addr)
+		os.Exit(0)
+	}
 
 	reportDir := report.MakeReportDir()
+	printInfo(args, reportDir)
+	probe(rq, addr)
+	fmt.Println("")
 
 	matchers, filters := reportable.FromArgs(args)
-
-	printInfo(args, reportDir)
-
-	probe := rq.Send(addr)
-	fmt.Println("Probe:", probe, "\n")
-
 	for  _, mut := range mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables()) {
 		res := mut.Send(addr)
 		if reportable.IsReportable(res, matchers, filters) {

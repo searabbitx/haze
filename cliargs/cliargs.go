@@ -14,10 +14,12 @@ type Args struct {
 	MatchLengths  string
 	FilterCodes   string
 	FilterLengths string
+	ProbeOnly     bool
 }
 
 type Param struct {
-	Long, Short, Default, Help string
+	Long, Short, Help string
+	Default           interface{}
 }
 
 func ParseArgs() Args {
@@ -31,6 +33,8 @@ func ParseArgs() Args {
 	stringVar(&args.FilterCodes, Param{Long: "fc", Help: "Comma-separated list of response codes to not report"})
 	stringVar(&args.FilterLengths, Param{Long: "fl", Help: "Comma-separated list of response lengths to not report"})
 
+	boolVar(&args.ProbeOnly, Param{Long: "probe", Short: "p", Help: "Send the probe request only"})
+
 	configUsage()
 
 	flag.Parse()
@@ -42,9 +46,24 @@ func ParseArgs() Args {
 }
 
 func stringVar(pvar *string, param Param) {
-	flag.StringVar(pvar, param.Long, param.Default, param.Help)
+	deflt := ""
+	if param.Default != nil {
+		deflt = param.Default.(string)
+	}
+	flag.StringVar(pvar, param.Long, deflt, param.Help)
 	if param.Short != "" {
-		flag.StringVar(pvar, param.Short, param.Default, "-"+param.Long+" (shorthand)")
+		flag.StringVar(pvar, param.Short, deflt, "-"+param.Long+" (shorthand)")
+	}
+}
+
+func boolVar(pvar *bool, param Param) {
+	deflt := false
+	if param.Default != nil {
+		deflt = param.Default.(bool)
+	}
+	flag.BoolVar(pvar, param.Long, deflt, param.Help)
+	if param.Short != "" {
+		flag.BoolVar(pvar, param.Short, deflt, "-"+param.Long+" (shorthand)")
 	}
 }
 
