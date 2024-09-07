@@ -97,9 +97,18 @@ type JsonMutation struct {
 	Revert func()
 }
 
-func mutateJson(data map[string]interface{}, trans func(string) string) [][]byte {
+func mutateJson(data interface{}, trans func(string) string) [][]byte {
 	result := [][]byte{}
-	for _, jsonMut := range mutateJsonRecursive(data, trans, []JsonMutation{}) {
+
+	var muts []JsonMutation
+	switch data.(type) {
+	case []any:
+		muts = mutateJsonArray(data.([]interface{}), trans)
+	default:
+		muts = mutateJsonRecursive(data.(map[string]interface{}), trans)
+	}
+
+	for _, jsonMut := range muts {
 		jsonMut.Apply()
 		js, _ := json.Marshal(data)
 		result = append(result, js)
@@ -108,11 +117,12 @@ func mutateJson(data map[string]interface{}, trans func(string) string) [][]byte
 	return result
 }
 
-func mutateJsonRecursive(data map[string]interface{}, trans func(string) string, agg []JsonMutation) []JsonMutation {
+func mutateJsonRecursive(data map[string]interface{}, trans func(string) string) []JsonMutation {
+	agg := []JsonMutation{}
 	for key, val := range data {
 		switch val.(type) {
 		case map[string]interface{}:
-			subs := mutateJsonRecursive(val.(map[string]interface{}), trans, agg)
+			subs := mutateJsonRecursive(val.(map[string]interface{}), trans)
 			agg = append(agg, subs...)
 		case []any:
 			arr := val.([]interface{})
@@ -131,7 +141,7 @@ func mutateJsonArray(arr []interface{}, trans func(string) string) []JsonMutatio
 		v := v
 		switch v.(type) {
 		case map[string]interface{}:
-			muts := mutateJsonRecursive(v.(map[string]interface{}), trans, []JsonMutation{})
+			muts := mutateJsonRecursive(v.(map[string]interface{}), trans)
 			res = append(res, muts...)
 		default:
 			mut := JsonMutation{
@@ -160,8 +170,8 @@ func mutateJsonLeaf(data map[string]interface{}, key string, trans func(string) 
 	}
 }
 
-func decodeJson(bs []byte) map[string]interface{} {
-	var data map[string]interface{}
+func decodeJson(bs []byte) interface{} {
+	var data interface{}
 	json.Unmarshal(bs, &data)
 	return data
 }
