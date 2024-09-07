@@ -53,6 +53,14 @@ func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 	pool.Wait()
 }
 
+func parseRequestsFromFile(rfile string, args cliargs.Args) []http.Request {
+	raw := readRawRequest(rfile)
+	if !args.Har {
+		return []http.Request{http.Parse(raw)}
+	}
+	return http.ParseHar(raw)
+}
+
 func main() {
 	ErrorLog = log.New(os.Stdout, "ERROR: ", 0)
 	args := cliargs.ParseArgs()
@@ -66,12 +74,15 @@ func main() {
 	
 	for _, rfile := range args.RequestFiles {
 		fmt.Printf("... ( %v ) ...\n", rfile)
-		rq := http.Parse(readRawRequest(rfile))
-		probe(rq, args.Host)
-		if args.ProbeOnly {
-			fmt.Println()
-		} else {
-			fuzz(args, rq, reportDir)
+		for _, rq := range parseRequestsFromFile(rfile, args) {
+			fmt.Printf("      %v %v\n", rq.Method, rq.RequestUri)
+			fmt.Printf("      ---\n")
+			probe(rq, args.Host)
+			if args.ProbeOnly {
+				fmt.Println()
+			} else {
+				fuzz(args, rq, reportDir)
+			}
 		}
 	}
 }
