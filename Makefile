@@ -39,7 +39,7 @@ build/bin/haze_%: $(SRCS)
 
 .PHONY: format
 format:
-	gofmt -w */*go
+	gofmt -s -w */*go
 
 .PHONY: test
 test:
