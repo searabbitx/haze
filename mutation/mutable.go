@@ -17,8 +17,9 @@ func urlEncodeSpecials(val string) string {
 }
 
 func Path(rq http.Request, trans func(string) string) []http.Request {
-	val := urlEncodeSpecials(trans(rq.Path))
-	return []http.Request{rq.WithPath(val)}
+	noLeadingSlash := rq.Path[1:]
+	val := urlEncodeSpecials(trans(noLeadingSlash))
+	return []http.Request{rq.WithPath("/" + val)}
 }
 
 func Parameter(rq http.Request, trans func(string) string) []http.Request {
@@ -39,7 +40,7 @@ func Parameter(rq http.Request, trans func(string) string) []http.Request {
 }
 
 func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
-	if len(rq.Body) == 0 {
+	if len(rq.Body) == 0 || !rq.HasFormUrlEncodedBody() {
 		return []http.Request{}
 	}
 
