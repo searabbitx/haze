@@ -79,6 +79,10 @@ func (r Request) Send(host string) {
 		panic(err)
 	}
 
+	for key, val := range r.Headers {
+		req.Header.Set(key, val)
+	}
+
 	client := &http.Client{}
 	_, err = client.Do(req)
 	if err != nil {
