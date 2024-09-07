@@ -57,15 +57,18 @@ func main() {
 	ErrorLog = log.New(os.Stdout, "ERROR: ", 0)
 	args := cliargs.ParseArgs()
 
+	reportDir := ""
+	if !args.ProbeOnly {
+		reportDir = report.MakeReportDir(args.OutputDir)
+	}
+	cliargs.PrintInfo(args, reportDir)
+
 	rq := http.Parse(readRawRequest(args.RequestFiles[0]))
 	if args.ProbeOnly {
-		cliargs.PrintInfo(args, "")
 		probe(rq, args.Host)
 		os.Exit(0)
 	}
 
-	reportDir := report.MakeReportDir(args.OutputDir)
-	cliargs.PrintInfo(args, reportDir)
 	probe(rq, args.Host)
 	fmt.Println("\n  ...   Fuzzing    ...")
 
