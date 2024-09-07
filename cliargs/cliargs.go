@@ -11,6 +11,7 @@ type Args struct {
 	Host          string
 	RequestFile   string
 	OutputDir     string
+	Threads       int
 	MatchCodes    string
 	MatchLengths  string
 	MatchString   string
@@ -31,6 +32,7 @@ func ParseArgs() Args {
 	stringVar("GENERAL", &args.RequestFile, Param{Long: "request", Short: "r", Help: "File containing the raw http request"})
 	boolVar("GENERAL", &args.ProbeOnly, Param{Long: "probe", Short: "p", Help: "Send the probe request only"})
 	stringVar("GENERAL", &args.OutputDir, Param{Long: "output", Short: "o", Help: "Directory where the report will be created. (Default: cwd)"})
+	intVar("GENERAL", &args.Threads, Param{Long: "threads", Short: "th", Default: 10, Help: "Number of threads to use for fuzzing"})
 
 	stringVar("MATCHERS", &args.MatchCodes, Param{Long: "mc", Default: "500-599", Help: "Comma-separated list of response codes to report"})
 	stringVar("MATCHERS", &args.MatchLengths, Param{Long: "ml", Help: "Comma-separated list of response lengths to report"})
@@ -59,6 +61,18 @@ func stringVar(group string, pvar *string, param Param) {
 	flag.StringVar(pvar, param.Long, deflt, param.Help)
 	if param.Short != "" {
 		flag.StringVar(pvar, param.Short, deflt, "")
+	}
+}
+
+func intVar(group string, pvar *int, param Param) {
+	registerFlag(group, flagName{param.Long, param.Short})
+	deflt := 0
+	if param.Default != nil {
+		deflt = param.Default.(int)
+	}
+	flag.IntVar(pvar, param.Long, deflt, param.Help)
+	if param.Short != "" {
+		flag.IntVar(pvar, param.Short, deflt, "")
 	}
 }
 
