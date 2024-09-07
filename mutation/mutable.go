@@ -92,39 +92,66 @@ func JsonParameter(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
-func mutateJson(data map[string]interface{}, trans func(string) string) [][]byte {
-	return mutateJsonRecursive(data, data, trans, [][]byte{})
+type JsonMutation struct {
+	Apply  func()
+	Revert func()
 }
 
-func mutateJsonRecursive(full map[string]interface{}, curr map[string]interface{}, trans func(string) string, agg [][]byte) [][]byte {
-	for key, val := range curr {
+func mutateJson(data map[string]interface{}, trans func(string) string) [][]byte {
+	result := [][]byte{}
+	for _, jsonMut := range mutateJsonRecursive(data, trans, []JsonMutation{}) {
+		jsonMut.Apply()
+		js, _ := json.Marshal(data)
+		result = append(result, js)
+		jsonMut.Revert()
+	}
+	return result
+}
+
+func mutateJsonRecursive(data map[string]interface{}, trans func(string) string, agg []JsonMutation) []JsonMutation {
+	for key, val := range data {
 		switch val.(type) {
 		case map[string]interface{}:
-			subs := mutateJsonRecursive(full, val.(map[string]interface{}), trans, agg)
+			subs := mutateJsonRecursive(val.(map[string]interface{}), trans, agg)
 			agg = append(agg, subs...)
 		case []any:
 			arr := val.([]interface{})
-			for i, v := range arr {
-				arr[i] = trans(v.(string))
-				agg = append(agg, mutateJsonKey(full, curr, key, val))
-				arr[i] = v
-			}
+			agg = append(agg, mutateJsonArray(arr, trans)...)
 		default:
-			mut := trans(fmt.Sprintf("%v", val))
-			mutJson := mutateJsonKey(full, curr, key, mut)
-			agg = append(agg, mutJson)
+			agg = append(agg, mutateJsonLeaf(data, key, trans))
 		}
 	}
 	return agg
 }
 
-func mutateJsonKey(full map[string]interface{}, curr map[string]interface{}, key string, val interface{}) (result []byte) {
-	orig := curr[key]
-	defer func() { curr[key] = orig }()
+func mutateJsonArray(arr []interface{}, trans func(string) string) []JsonMutation {
+	res := []JsonMutation{}
+	for i, v := range arr {
+		i := i
+		v := v
+		mut := JsonMutation{
+			Apply: func() {
+				arr[i] = trans(v.(string))
+			},
+			Revert: func() {
+				arr[i] = v
+			},
+		}
+		res = append(res, mut)
+	}
+	return res
+}
 
-	curr[key] = val
-	result, _ = json.Marshal(full)
-	return
+func mutateJsonLeaf(data map[string]interface{}, key string, trans func(string) string) JsonMutation {
+	val := data[key]
+	return JsonMutation{
+		Apply: func() {
+			data[key] = trans(fmt.Sprintf("%v", val))
+		},
+		Revert: func() {
+			data[key] = val
+		},
+	}
 }
 
 func decodeJson(bs []byte) map[string]interface{} {
