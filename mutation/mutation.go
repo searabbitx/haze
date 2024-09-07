@@ -81,23 +81,25 @@ func prefixMutation(rq http.Request, mutable Mutable, prefix string) []http.Requ
 	return mutable.apply(rq, trans)
 }
 
-func cannotApply(mutation Mutation, mutable Mutable) bool {
-	if mutation.name == Arraize.name && mutable.name != ParameterName.name {
+func canApply(mutation Mutation, mutable Mutable) bool {
+	switch mutation.name {
+	case Arraize.name:
+		switch mutable.name {
+		case ParameterName.name, BodyParameterName.name:
+			return true
+		default:
+			return false
+		}
+	default:
 		return true
 	}
-	return false
-}
-
-func AllMutations() []Mutation {
-	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
-		TimesSeven, Brackets, Backtick, Comma}
 }
 
 func Mutate(rq http.Request, mutations []Mutation, mutables []Mutable) []http.Request {
 	result := []http.Request{}
 	for _, mutation := range mutations {
 		for _, mutable := range mutables {
-			if cannotApply(mutation, mutable) {
+			if !canApply(mutation, mutable) {
 				continue
 			}
 			mrq := mutation.apply(rq, mutable)
@@ -105,4 +107,9 @@ func Mutate(rq http.Request, mutations []Mutation, mutables []Mutable) []http.Re
 		}
 	}
 	return result
+}
+
+func AllMutations() []Mutation {
+	return []Mutation{SingleQuotes, DoubleQuotes, SstiFuzz, Negative, MinusOne,
+		TimesSeven, Brackets, Backtick, Comma, Arraize}
 }

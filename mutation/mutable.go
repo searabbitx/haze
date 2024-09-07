@@ -75,6 +75,22 @@ func bodyParameter(rq http.Request, trans func(string) string) []http.Request {
 	return result
 }
 
+var BodyParameterName = Mutable{"BodyParameterName", bodyParameterName}
+
+func bodyParameterName(rq http.Request, trans func(string) string) []http.Request {
+	result := []http.Request{}
+	if len(rq.Body) == 0 || !rq.HasFormUrlEncodedBody() {
+		return result
+	}
+	do := func(key, val string) (string, string) {
+		return trans(key), val
+	}
+	for _, q := range applyToEachParam(string(rq.Body), do) {
+		result = append(result, rq.WithBody([]byte(q)))
+	}
+	return result
+}
+
 func applyToEachParam(params string, do func(key, val string) (string, string)) []string {
 	result := []string{}
 	for _, p := range strings.Split(params, "&") {
@@ -228,5 +244,5 @@ func decodeJson(bs []byte) interface{} {
 }
 
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter, ParameterName, BodyParameter, Header, Cookie, JsonParameter}
+	return []Mutable{Path, Parameter, ParameterName, BodyParameter, BodyParameterName, Header, Cookie, JsonParameter}
 }
