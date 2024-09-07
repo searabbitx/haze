@@ -30,6 +30,8 @@ func registerFlag(groupName string, fn flagName) {
 
 func printUsage() {
 	PrintBanner()
+	fmt.Println("USAGE:")
+	fmt.Println("  haze [OPTION]... [REQUEST_FILE]...")
 	for _, g := range groups {
 		fmt.Printf("\n%v:\n", g.name)
 		for _, f := range g.flagNames {
