@@ -6,6 +6,7 @@ import (
 	"os"
 	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
+	"github.com/kamil-s-solecki/haze/mutable"
 	"github.com/kamil-s-solecki/haze/mutation"
 	"github.com/kamil-s-solecki/haze/progress"
 	"github.com/kamil-s-solecki/haze/report"
@@ -30,7 +31,7 @@ func probe(rq http.Request, addr string) {
 
 func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
 	matchers, filters := reportable.FromArgs(args)
-	muts := mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables())
+	muts := mutation.Mutate(rq, mutation.AllMutations(), mutable.AllMutatables())
 	bar := progress.Start(len(muts))
 	pool := workerpool.NewPool(args.Threads)
 

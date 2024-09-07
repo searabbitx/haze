@@ -1,61 +1,64 @@
 package mutation
 
-import "github.com/kamil-s-solecki/haze/http"
+import (
+	"github.com/kamil-s-solecki/haze/http"
+	"github.com/kamil-s-solecki/haze/mutable"
+)
 
 type Mutation struct {
 	name  string
-	apply func(http.Request, Mutable) []http.Request
+	apply func(http.Request, mutable.Mutable) []http.Request
 }
 
-func singleQuotes(rq http.Request, mutable Mutable) []http.Request {
+func singleQuotes(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "'")
 }
 
 var SingleQuotes = Mutation{"SingleQuotes", singleQuotes}
 
-func doubleQuotes(rq http.Request, mutable Mutable) []http.Request {
+func doubleQuotes(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "\"")
 }
 
 var DoubleQuotes = Mutation{"DoubleQuotes", doubleQuotes}
 
-func sstiFuzz(rq http.Request, mutable Mutable) []http.Request {
+func sstiFuzz(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "${{<%[%'\"}}%\\.")
 }
 
 var SstiFuzz = Mutation{"SstiFuzz", sstiFuzz}
 
-func negative(rq http.Request, mutable Mutable) []http.Request {
+func negative(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return prefixMutation(rq, mutable, "-")
 }
 
 var Negative = Mutation{"Negative", negative}
 
-func minusOne(rq http.Request, mutable Mutable) []http.Request {
+func minusOne(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "-1")
 }
 
 var MinusOne = Mutation{"MinusOne", minusOne}
 
-func timesSeven(rq http.Request, mutable Mutable) []http.Request {
+func timesSeven(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "*7")
 }
 
 var TimesSeven = Mutation{"TimesSeven", timesSeven}
 
-func brackets(rq http.Request, mutable Mutable) []http.Request {
+func brackets(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ")]}>")
 }
 
 var Brackets = Mutation{"Brackets", brackets}
 
-func backtick(rq http.Request, mutable Mutable) []http.Request {
+func backtick(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "`")
 }
 
 var Backtick = Mutation{"Backtick", backtick}
 
-func comma(rq http.Request, mutable Mutable) []http.Request {
+func comma(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, ",")
 }
 
@@ -63,29 +66,29 @@ var Comma = Mutation{"Comma", comma}
 
 var Arraize = Mutation{"Arraize", arraize}
 
-func arraize(rq http.Request, mutable Mutable) []http.Request {
+func arraize(rq http.Request, mutable mutable.Mutable) []http.Request {
 	return suffixMutation(rq, mutable, "[]")
 }
 
-func suffixMutation(rq http.Request, mutable Mutable, suffix string) []http.Request {
+func suffixMutation(rq http.Request, mutable mutable.Mutable, suffix string) []http.Request {
 	trans := func(val string) string {
 		return val + suffix
 	}
-	return mutable.apply(rq, trans)
+	return mutable.Apply(rq, trans)
 }
 
-func prefixMutation(rq http.Request, mutable Mutable, prefix string) []http.Request {
+func prefixMutation(rq http.Request, mutable mutable.Mutable, prefix string) []http.Request {
 	trans := func(val string) string {
 		return prefix + val
 	}
-	return mutable.apply(rq, trans)
+	return mutable.Apply(rq, trans)
 }
 
-func canApply(mutation Mutation, mutable Mutable) bool {
+func canApply(mutation Mutation, mtbl mutable.Mutable) bool {
 	switch mutation.name {
 	case Arraize.name:
-		switch mutable.name {
-		case ParameterName.name, BodyParameterName.name:
+		switch mtbl.Name {
+		case mutable.ParameterName.Name, mutable.BodyParameterName.Name:
 			return true
 		default:
 			return false
@@ -95,7 +98,7 @@ func canApply(mutation Mutation, mutable Mutable) bool {
 	}
 }
 
-func Mutate(rq http.Request, mutations []Mutation, mutables []Mutable) []http.Request {
+func Mutate(rq http.Request, mutations []Mutation, mutables []mutable.Mutable) []http.Request {
 	result := []http.Request{}
 	for _, mutation := range mutations {
 		for _, mutable := range mutables {
