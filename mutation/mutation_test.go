@@ -174,3 +174,38 @@ func TestApplyTimesSevenMutationToParameter(t *testing.T) {
 	testutils.AssertEquals(t, got[0].Query, "foo=123*7")
 	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=123*7")
 }
+
+func TestDoNothingWithNonJsonBody(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: 7\r\n\r\nfoo=bar"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+
+	testutils.AssertLen(t, got, 0)
+}
+
+func TestApplySingleQuotesMutationToJsonParameter(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":\"bar\"}"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte("{\"foo\":\"bar'\"}"))
+}
+
+func TestApplySingleQuotesMutationToNumericJsonParameter(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\": 3}"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte("{\"foo\":\"3'\"}"))
+}
+
+func TestApplySingleQuotesMutationToANestedJsonParameter(t *testing.T) {
+	rq := http.Parse([]byte("POST /auth HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 13\r\n\r\n{\"foo\":{\"bar\":\"baz\"}}"))
+
+	got := Mutate(rq, []Mutation{SingleQuotes}, []Mutable{JsonParameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertByteEquals(t, got[0].Body, []byte(`{"foo":{"bar":"baz'"}}`))
+}

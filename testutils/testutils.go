@@ -32,7 +32,7 @@ func AssertMapEquals[T comparable](t *testing.T, got map[T]T, want map[T]T) {
 
 func AssertByteEquals(t *testing.T, got []byte, want []byte) {
 	if !bytes.Equal(got, want) {
-		t.Errorf("got %v, wanted %v", got, want)
+		t.Errorf("got %s, wanted %s", got, want)
 	}
 }
 
