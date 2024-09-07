@@ -26,8 +26,11 @@ func Parameter(rq http.Request, trans func(string) string) []http.Request {
 
 	result := []http.Request{}
 	for _, p := range strings.Split(rq.Query, "&") {
-		val := urlEncodeSpecials(trans(p))
-		q := strings.Replace(rq.Query, p, val, 1)
+		key := strings.Split(p, "=")[0]
+		val := strings.Split(p, "=")[1]
+		keyNVal := key + "=" + urlEncodeSpecials(trans(val))
+
+		q := strings.Replace(rq.Query, p, keyNVal, 1)
 		result = append(result, rq.WithQuery(q))
 	}
 	return result
@@ -41,8 +44,11 @@ func BodyParameter(rq http.Request, trans func(string) string) []http.Request {
 	result := []http.Request{}
 	body := string(rq.Body)
 	for _, p := range strings.Split(body, "&") {
-		val := urlEncodeSpecials(trans(p))
-		q := strings.Replace(body, p, val, 1)
+		key := strings.Split(p, "=")[0]
+		val := strings.Split(p, "=")[1]
+		keyNVal := key + "=" + urlEncodeSpecials(trans(val))
+
+		q := strings.Replace(body, p, keyNVal, 1)
 		result = append(result, rq.WithBody([]byte(q)))
 	}
 	return result

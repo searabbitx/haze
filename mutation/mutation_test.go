@@ -144,3 +144,33 @@ func TestSkipCertainHeaders(t *testing.T) {
 
 	testutils.AssertLen(t, got, 0)
 }
+
+func TestApplyNegativeMutationToParameter(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Negative}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=-123")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=-123")
+}
+
+func TestApplyMinusOneMutationToParameter(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{MinusOne}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=123-1")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=123-1")
+}
+
+func TestApplyTimesSevenMutationToParameter(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=123 HTTP/1.1\r\nHost:www.example.com\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{TimesSeven}, []Mutable{Parameter})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Query, "foo=123*7")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=123*7")
+}
