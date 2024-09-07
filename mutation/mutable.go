@@ -102,6 +102,12 @@ func mutateJsonRecursive(full map[string]interface{}, curr map[string]interface{
 		case map[string]interface{}:
 			subs := mutateJsonRecursive(full, val.(map[string]interface{}), trans, agg)
 			agg = append(agg, subs...)
+		case []any:
+			mut := []string{}
+			for _, v := range val.([]interface{}) {
+				mut = append(mut, trans(v.(string)))
+			}
+			agg = append(agg, mutateJsonKey(full, curr, key, mut))
 		default:
 			mut := trans(fmt.Sprintf("%v", val))
 			mutJson := mutateJsonKey(full, curr, key, mut)
@@ -111,7 +117,7 @@ func mutateJsonRecursive(full map[string]interface{}, curr map[string]interface{
 	return agg
 }
 
-func mutateJsonKey(full map[string]interface{}, curr map[string]interface{}, key, val string) (result []byte) {
+func mutateJsonKey(full map[string]interface{}, curr map[string]interface{}, key string, val interface{}) (result []byte) {
 	orig := curr[key]
 	defer func() { curr[key] = orig }()
 
