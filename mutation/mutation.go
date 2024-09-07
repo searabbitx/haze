@@ -20,7 +20,7 @@ func DoubleQuotes(rq http.Request, mutable Mutable) []http.Request {
 
 func SstiFuzz(rq http.Request, mutable Mutable) []http.Request {
 	trans := func(val string) string {
-		return val + "${{<%25[%25'%22}}%25%5c."
+		return val + "${{<%[%'\"}}%\\."
 	}
 	return mutable(rq, trans)
 }

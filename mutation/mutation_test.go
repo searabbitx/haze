@@ -30,8 +30,8 @@ func TestApplyDoubleQuotesMutationToPath(t *testing.T) {
 	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Path})
 
 	testutils.AssertLen(t, got, 1)
-	testutils.AssertEquals(t, got[0].Path, "/somepath\"")
-	testutils.AssertEquals(t, got[0].RequestUri, "/somepath\"")
+	testutils.AssertEquals(t, got[0].Path, "/somepath%22")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath%22")
 }
 
 func TestApplySingleQuotesMutationToParameter(t *testing.T) {
@@ -50,8 +50,8 @@ func TestApplyDoubleQuotesMutationToParameter(t *testing.T) {
 	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
 
 	testutils.AssertLen(t, got, 1)
-	testutils.AssertEquals(t, got[0].Query, "foo=bar\"")
-	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar\"")
+	testutils.AssertEquals(t, got[0].Query, "foo=bar%22")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar%22")
 }
 
 func TestApplyDoubleQuotesMutationToBothParameters(t *testing.T) {
@@ -60,10 +60,10 @@ func TestApplyDoubleQuotesMutationToBothParameters(t *testing.T) {
 	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Parameter})
 
 	testutils.AssertLen(t, got, 2)
-	testutils.AssertEquals(t, got[0].Query, "foo=bar\"&baz=quix")
-	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar\"&baz=quix")
-	testutils.AssertEquals(t, got[1].Query, "foo=bar&baz=quix\"")
-	testutils.AssertEquals(t, got[1].RequestUri, "/somepath?foo=bar&baz=quix\"")
+	testutils.AssertEquals(t, got[0].Query, "foo=bar%22&baz=quix")
+	testutils.AssertEquals(t, got[0].RequestUri, "/somepath?foo=bar%22&baz=quix")
+	testutils.AssertEquals(t, got[1].Query, "foo=bar&baz=quix%22")
+	testutils.AssertEquals(t, got[1].RequestUri, "/somepath?foo=bar&baz=quix%22")
 }
 
 func TestDoNothingForEmptyQuery(t *testing.T) {
@@ -88,7 +88,7 @@ func TestApplyDoubleQuotesMutationToBodyParameter(t *testing.T) {
 	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{BodyParameter})
 
 	testutils.AssertLen(t, got, 1)
-	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=bar\""))
+	testutils.AssertByteEquals(t, got[0].Body, []byte("foo=bar%22"))
 }
 
 func TestApplySingleQuotesMutationToBodyParameter(t *testing.T) {
@@ -117,4 +117,30 @@ func TestApplyDoubleQuotesMutationToHeader(t *testing.T) {
 
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar\"")
+}
+
+func TestApplySstiFuzzMutationToHeader(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath?foo=bar HTTP/1.1\r\nFoo:bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{SstiFuzz}, []Mutable{Header})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar${{<%[%'\"}}%\\.")
+}
+
+func TestApplyDoubleQuotesMutationToCookie(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nCookie: foo=bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Cookie})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Cookies["foo"], "bar%22")
+}
+
+func TestSkipCertainHeaders(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nHost: bar\r\nConnection: bar\r\nContent-Type: bar\r\nContent-Length: bar\r\nAccept-Encoding: bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{DoubleQuotes}, []Mutable{Header})
+
+	testutils.AssertLen(t, got, 0)
 }

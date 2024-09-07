@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -14,6 +15,7 @@ type Request struct {
 	Query           string
 	ProtocolVersion string
 	Headers         map[string]string
+	Cookies         map[string]string
 	Body            []byte
 }
 
@@ -29,9 +31,15 @@ func Parse(bs []byte) Request {
 
 	headers := parseHeaders(bs)
 
+	cookies := map[string]string{}
+	if rawCookies, ok := headers["Cookie"]; ok {
+		delete(headers, "Cookie")
+		parseRawCookies(cookies, rawCookies)
+	}
+
 	body := extractBody(bs)
 	return Request{Method: method, RequestUri: requestUri, Path: path, Query: query,
-		ProtocolVersion: protocolVersion, Headers: headers, Body: body}
+		ProtocolVersion: protocolVersion, Headers: headers, Cookies: cookies, Body: body}
 }
 
 func parseRequestLine(requestLine []byte) (method, requestUri, protocolVersion string) {
@@ -78,15 +86,35 @@ func extractBody(rawReq []byte) []byte {
 	return rawReq[bodyIndex:]
 }
 
+func parseRawCookies(cookies map[string]string, raw string) {
+	for _, c := range strings.Split(raw, "; ") {
+		key := strings.Split(c, "=")[0]
+		val := strings.Split(c, "=")[1]
+		cookies[key] = val
+	}
+}
+
 func (r Request) asHttpReq(host string) *http.Request {
 	url := host + r.RequestUri
-	req, err := http.NewRequest(r.Method, url, nil)
+	var body io.Reader
+	if len(r.Body) > 0 {
+		body = bytes.NewBuffer(r.Body)
+	} else {
+		body = nil
+	}
+
+	req, err := http.NewRequest(r.Method, url, body)
 	if err != nil {
 		panic(err)
 	}
 
 	for key, val := range r.Headers {
 		req.Header.Set(key, val)
+	}
+
+	for key, val := range r.Cookies {
+		c := &http.Cookie{Name: key, Value: val}
+		req.AddCookie(c)
 	}
 	return req
 }
@@ -134,12 +162,18 @@ func (r Request) WithHeader(key, val string) Request {
 	return result
 }
 
-func (r Request) Clone() Request {
-	return Request{Method: r.Method, RequestUri: r.RequestUri, Path: r.Path, Query: r.Query,
-		ProtocolVersion: r.ProtocolVersion, Headers: copyHeaders(r.Headers), Body: r.Body}
+func (r Request) WithCookie(key, val string) Request {
+	result := r.Clone()
+	result.Cookies[key] = val
+	return result
 }
 
-func copyHeaders(hs map[string]string) map[string]string {
+func (r Request) Clone() Request {
+	return Request{Method: r.Method, RequestUri: r.RequestUri, Path: r.Path, Query: r.Query,
+		ProtocolVersion: r.ProtocolVersion, Headers: copyMap(r.Headers), Cookies: copyMap(r.Cookies), Body: r.Body}
+}
+
+func copyMap(hs map[string]string) map[string]string {
 	res := make(map[string]string)
 	for k, v := range hs {
 		res[k] = v

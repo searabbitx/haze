@@ -47,3 +47,9 @@ func AssertLen[T any](t *testing.T, slice []T, length int) {
 		t.Errorf("got a slice of len %v, wanted %v", len(slice), length)
 	}
 }
+
+func AssertMapHasNoKey[T comparable](t *testing.T, m map[T]T, key T) {
+	if _, ok := m[key]; ok {
+		t.Errorf("got a map with the %v key, expected no such key", key)
+	}
+}

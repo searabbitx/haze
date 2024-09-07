@@ -1,5 +1,6 @@
 GET /test?foo=bar HTTP/1.1
 Host: httpbin.org
+Cookie: foo=bar; baz=quix
 User-Agent: haze
 Connection: close
 
