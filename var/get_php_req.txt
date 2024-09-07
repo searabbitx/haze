@@ -1,0 +1,5 @@
+GET /test.php?foo=bar HTTP/1.1
+Host: httpbin.org
+User-Agent: haze
+Connection: close
+
