@@ -103,11 +103,12 @@ func mutateJsonRecursive(full map[string]interface{}, curr map[string]interface{
 			subs := mutateJsonRecursive(full, val.(map[string]interface{}), trans, agg)
 			agg = append(agg, subs...)
 		case []any:
-			mut := []string{}
-			for _, v := range val.([]interface{}) {
-				mut = append(mut, trans(v.(string)))
+			arr := val.([]interface{})
+			for i, v := range arr {
+				arr[i] = trans(v.(string))
+				agg = append(agg, mutateJsonKey(full, curr, key, val))
+				arr[i] = v
 			}
-			agg = append(agg, mutateJsonKey(full, curr, key, mut))
 		default:
 			mut := trans(fmt.Sprintf("%v", val))
 			mutJson := mutateJsonKey(full, curr, key, mut)
