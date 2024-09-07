@@ -9,6 +9,8 @@ import (
 
 type Matcher func(http.Response) bool
 
+type Filter func(http.Response) bool
+
 type Range struct{ From, To int }
 
 func MatchCodes(codes string) Matcher {
@@ -18,10 +20,24 @@ func MatchCodes(codes string) Matcher {
 	}
 }
 
-func MatchLengths(codes string) Matcher {
-	ranges := parseRanges(codes)
+func MatchLengths(lens string) Matcher {
+	ranges := parseRanges(lens)
 	return func(res http.Response) bool {
 		return isValueInRanges(ranges, int(res.Length))
+	}
+}
+
+func FilterCodes(codes string) Filter {
+	ranges := parseRanges(codes)
+	return func(res http.Response) bool {
+		return !isValueInRanges(ranges, res.Code)
+	}
+}
+
+func FilterLengths(lens string) Filter {
+	ranges := parseRanges(lens)
+	return func(res http.Response) bool {
+		return !isValueInRanges(ranges, int(res.Length))
 	}
 }
 
@@ -64,11 +80,21 @@ func FromArgs(args cliargs.Args) []Matcher {
 	return result
 }
 
-func IsReportable(res http.Response, matchers []Matcher) bool {
+func IsReportable(res http.Response, matchers []Matcher, filters []Filter) bool {
+	matched := false
+	filtered := true
+
 	for _, matcher := range matchers {
 		if matcher(res) {
-			return true
+			matched = true
+			break
 		}
 	}
-	return false
+	for _, filter := range filters {
+		if !filter(res) {
+			filtered = false
+			break
+		}
+	}
+	return filtered && (matched || len(matchers) == 0)
 }
