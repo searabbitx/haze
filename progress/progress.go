@@ -3,7 +3,6 @@ package progress
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strings"
 	"sync"
 )
@@ -14,8 +13,8 @@ type Bar struct {
 	mu          sync.Mutex
 }
 
-func Start(total int) Bar {
-	b := Bar{curr: 0, total: total, buff: bufio.NewWriter(os.Stdout)}
+func Start(total int, buff *bufio.Writer, mu sync.Mutex) Bar {
+	b := Bar{curr: 0, total: total, buff: buff, mu: mu}
 	return b
 }
 
