@@ -22,18 +22,18 @@ func TestMethod(t *testing.T) {
 	}
 }
 
-func TestPath(t *testing.T) {
+func TestRequestUri(t *testing.T) {
 	cases := []struct {
-		req  []byte
-		path string
+		req        []byte
+		requestUri string
 	}{
 		{[]byte("GET /somepath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/somepath"},
 		{[]byte("GET /otherpath HTTP/1.1\r\nHost:www.example.com\r\n\r\n"), "/otherpath"},
 	}
 
 	for _, c := range cases {
-		got := Parse(c.req).Path
-		want := c.path
+		got := Parse(c.req).RequestUri
+		want := c.requestUri
 
 		testutils.AssertEquals(t, got, want)
 	}

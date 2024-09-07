@@ -7,7 +7,7 @@ import (
 
 type Request struct {
 	Method          string
-	Path            string
+	RequestUri      string
 	ProtocolVersion string
 	Headers         map[string]string
 	Body            []byte
@@ -15,19 +15,19 @@ type Request struct {
 
 func Parse(bs []byte) Request {
 	requestLine := bytes.Split(bs, []byte("\r\n"))[0]
-	method, path, protocolVersion := parseRequestLine(requestLine)
+	method, requestUri, protocolVersion := parseRequestLine(requestLine)
 
 	headers := parseHeaders(bs)
 
 	body := extractBody(bs)
-	return Request{Method: method, Path: path,
+	return Request{Method: method, RequestUri: requestUri,
 		ProtocolVersion: protocolVersion, Headers: headers, Body: body}
 }
 
-func parseRequestLine(requestLine []byte) (method, path, protocolVersion string) {
+func parseRequestLine(requestLine []byte) (method, requestUri, protocolVersion string) {
 	spaceSplitted := bytes.Split(requestLine, []byte(" "))
 	method = string(spaceSplitted[0])
-	path = string(spaceSplitted[1])
+	requestUri = string(spaceSplitted[1])
 	protocolVersion = string(spaceSplitted[2])
 	return
 }
