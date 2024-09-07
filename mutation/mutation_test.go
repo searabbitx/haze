@@ -282,3 +282,30 @@ func TestApplySingleQuotesMutationToAStringJson(t *testing.T) {
 	testutils.AssertLen(t, got, 1)
 	testutils.AssertByteEquals(t, got[0].Body, []byte(`"bar'"`))
 }
+
+func TestApplyBracketsMutationToHeader(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Brackets}, []Mutable{Header})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar)]}>")
+}
+
+func TestApplyBacktickMutationToHeader(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Backtick}, []Mutable{Header})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar`")
+}
+
+func TestApplyCommaMutationToHeader(t *testing.T) {
+	rq := http.Parse([]byte("GET /somepath HTTP/1.1\r\nFoo: bar\r\n\r\n"))
+
+	got := Mutate(rq, []Mutation{Comma}, []Mutable{Header})
+
+	testutils.AssertLen(t, got, 1)
+	testutils.AssertEquals(t, got[0].Headers["Foo"], "bar,")
+}
