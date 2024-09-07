@@ -1,6 +1,7 @@
 package cliargs
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -145,12 +146,23 @@ func validateRequest(request string, isHar bool) {
 
 	if isHar {
 		validateJson(request)
+	} else {
+		validateRawRequest(request)
+	}
+}
+
+func validateRawRequest(request string) {
+	bs, _ := os.ReadFile(request)
+	lns := bytes.Split(bs, []byte("\r\n"))
+	if len(lns) < 3 {
+		err(request + " does not look like an http request\n" +
+			"  make sure that it contains CRLFs as line separators")
 	}
 }
 
 func validateJson(request string) {
-	content, _ := os.ReadFile(request)
-	if !json.Valid(content) {
+	bs, _ := os.ReadFile(request)
+	if !json.Valid(bs) {
 		err(request + " is not a valid json")
 	}
 }
