@@ -11,3 +11,9 @@ make test
 ```bash
 make format
 ```
+
+## Todos
+- [ ] handle `multipart/form-data`
+- [ ] introduce configurable filters (not only the 500s)
+- [ ] specify the output dir
+- [ ] make some sane logging and general output look
