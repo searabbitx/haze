@@ -20,8 +20,9 @@ type Request struct {
 }
 
 type Response struct {
-	Code int
-	Raw  []byte
+	Code   int
+	Length int64
+	Raw    []byte
 }
 
 func Parse(bs []byte) Request {
@@ -128,7 +129,7 @@ func (r Request) Send(host string) Response {
 		panic(err)
 	}
 	raw, err := httputil.DumpResponse(res, true)
-	return Response{res.StatusCode, raw}
+	return Response{res.StatusCode, res.ContentLength, raw}
 }
 
 func (r Request) Raw(host string) []byte {
