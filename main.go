@@ -18,34 +18,37 @@ func readRawRequest(rqPath string) []byte {
 
 func probe(rq http.Request, addr string) {
 	probe := rq.Send(addr)
-	fmt.Println("Probe:", probe)
+	fmt.Println("Probe:            ", probe)
+}
+
+func fuzz(args cliargs.Args, rq http.Request, reportDir string) {
+	matchers, filters := reportable.FromArgs(args)
+	muts := mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables())
+	bar := progress.Start(len(muts))
+	for  _, mut := range muts {
+		res := mut.Send(args.Host)
+		if reportable.IsReportable(res, matchers, filters) {
+			fname := report.Report(mut.Raw(args.Host), res.Raw, reportDir)
+			fmt.Printf("-={*}=- Crash!     %s (%s)\n", res, fname)
+		}
+		bar.Next()
+	}
 }
 
 func main() {
 	args := cliargs.ParseArgs()
 
 	rq := http.Parse(readRawRequest(args.RequestFile))
-	addr := args.Host
 	if args.ProbeOnly {
 		cliargs.PrintInfo(args, "")
-		probe(rq, addr)
+		probe(rq, args.Host)
 		os.Exit(0)
 	}
 
 	reportDir := report.MakeReportDir()
 	cliargs.PrintInfo(args, reportDir)
-	probe(rq, addr)
-	fmt.Println("")
+	probe(rq, args.Host)
+	fmt.Println("\n  ...   Fuzzing    ...")
 
-	matchers, filters := reportable.FromArgs(args)
-	muts := mutation.Mutate(rq, mutation.AllMutations(), mutation.AllMutatables())
-	bar := progress.Start(len(muts))
-	for  _, mut := range muts {
-		res := mut.Send(addr)
-		if reportable.IsReportable(res, matchers, filters) {
-			fname := report.Report(mut.Raw(addr), res.Raw, reportDir)
-			fmt.Printf("-={*}=- Crash! %s (%s)\n", res, fname)
-		}
-		bar.Next()
-	}
+	fuzz(args, rq, reportDir)
 }

@@ -33,5 +33,5 @@ func (b Bar) spinner() byte {
 }
 
 func (b Bar) String() string {
-	return fmt.Sprintf("  %c [ %v / %v ] %c", b.spinner(), b.curr, b.total, b.spinner())
+	return fmt.Sprintf("     %c [ %v / %v ] %c", b.spinner(), b.curr, b.total, b.spinner())
 }
