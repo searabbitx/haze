@@ -3,10 +3,12 @@ package tui
 import (
 	"bufio"
 	"fmt"
+	"github.com/kamil-s-solecki/haze/cliargs"
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/progress"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -52,12 +54,43 @@ func (t *Tui) Error(err error) {
 	t.errorLog.Println(err)
 }
 
+func (t *Tui) PrintBanner() {
+	t.println("               .**.        ")
+	t.println("            .. haze ..     ")
+	t.println("               `**`        ")
+}
+
+func (t *Tui) PrintInfo(args cliargs.Args, reportDir string) {
+	entries := []entry{
+		{"Target", args.Host},
+	}
+
+	if !args.ProbeOnly {
+		entries = append(entries, entry{"Report dir", reportDir})
+		entries = append(entries, entry{"Threads", strconv.Itoa(args.Threads)})
+	}
+
+	if args.Proxy != "" {
+		entries = append(entries, entry{"Proxy", args.Proxy})
+	}
+
+	t.printTable(entries)
+}
+
 func (t *Tui) printf(format string, a ...any) {
 	defer t.mu.Unlock()
 	defer t.buff.Flush()
 	t.mu.Lock()
 
 	fmt.Fprintf(t.buff, format, a...)
+}
+
+func (t *Tui) println(a ...any) {
+	defer t.mu.Unlock()
+	defer t.buff.Flush()
+	t.mu.Lock()
+
+	fmt.Fprintln(t.buff, a...)
 }
 
 func (t *Tui) ProgressBar(total int) progress.Bar {
