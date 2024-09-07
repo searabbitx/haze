@@ -25,5 +25,5 @@ func urlEncodeSpecials(val string) string {
 }
 
 func AllMutatables() []Mutable {
-	return []Mutable{Path, Parameter, ParameterName, BodyParameter, BodyParameterName, MultipartFormParameter, Header, Cookie, JsonParameter, JsonParameterRaw}
+	return []Mutable{Path, Parameter, ParameterName, BodyParameter, BodyParameterName, MultipartFormParameter, Header, Cookie, JsonParameter, JsonParameterRaw, CookieJsonParameter}
 }
