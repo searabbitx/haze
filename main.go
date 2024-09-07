@@ -6,6 +6,7 @@ import (
 	"github.com/kamil-s-solecki/haze/http"
 	"github.com/kamil-s-solecki/haze/mutation"
 	"github.com/kamil-s-solecki/haze/reportable"
+	"github.com/kamil-s-solecki/haze/report"
 )
 
 func readRawRequest() []byte {
@@ -28,6 +29,8 @@ func readRawRequest() []byte {
 func main() {
 	rq := http.Parse(readRawRequest())
 	addr := "http://localhost:9090"
+	reportDir := report.MakeReportDir()
+	fmt.Println("Report dir:", reportDir)
 
 	rq.Send(addr)
 
@@ -35,6 +38,7 @@ func main() {
 		res := mut.Send(addr)
 		if reportable.IsReportable(res) {
 			fmt.Println("Found 500!")
+			report.Report(mut.Raw(addr), res.Raw, reportDir)
 		}
 	}
 }

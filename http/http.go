@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 )
 
@@ -18,6 +19,7 @@ type Request struct {
 
 type Response struct {
 	Code int
+	Raw  []byte
 }
 
 func Parse(bs []byte) Request {
@@ -76,7 +78,7 @@ func extractBody(rawReq []byte) []byte {
 	return rawReq[bodyIndex:]
 }
 
-func (r Request) Send(host string) Response {
+func (r Request) asHttpReq(host string) *http.Request {
 	url := host + r.RequestUri
 	req, err := http.NewRequest(r.Method, url, nil)
 	if err != nil {
@@ -86,13 +88,24 @@ func (r Request) Send(host string) Response {
 	for key, val := range r.Headers {
 		req.Header.Set(key, val)
 	}
+	return req
+}
+
+func (r Request) Send(host string) Response {
+	req := r.asHttpReq(host)
 
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
-	return Response{res.StatusCode}
+	raw, err := httputil.DumpResponse(res, true)
+	return Response{res.StatusCode, raw}
+}
+
+func (r Request) Raw(host string) []byte {
+	bs, _ := httputil.DumpRequestOut(r.asHttpReq(host), true)
+	return bs
 }
 
 func (r Request) WithPath(path string) Request {
