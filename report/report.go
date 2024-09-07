@@ -2,6 +2,7 @@ package report
 
 import (
 	"os"
+	"path"
 	"strconv"
 	"time"
 )
@@ -31,8 +32,8 @@ func Report(rq []byte, res []byte, dir string) string {
 	return fname
 }
 
-func MakeReportDir() string {
-	dir := time.Now().Format("20060102_150405")
+func MakeReportDir(base string) string {
+	dir := path.Join(base, time.Now().Format("20060102_150405"))
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		panic(err)
 	}
